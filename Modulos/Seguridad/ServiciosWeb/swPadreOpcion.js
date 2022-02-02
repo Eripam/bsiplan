@@ -20,6 +20,24 @@ router.get("/ListaPadreOpcion", (req, res) => {
   }
 });
 
+// Servicio Listar Padre Opción activos
+router.get("/ListaPadreOpcionActivo", (req, res) => {
+  var lstPOpc = null;
+  try {
+    popc.PadreOpcionActivos((err, popc) => {
+      lstPOpc = popc;
+      if (lstPOpc == null) {
+        salida = false;
+      } else {
+        salida = true;
+      }
+      return res.json({ success: salida, data: popc });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 //Servicios ingresar Padre Opción
 router.post("/IngresarPadreOpcion/", (req, res) => {
   try {

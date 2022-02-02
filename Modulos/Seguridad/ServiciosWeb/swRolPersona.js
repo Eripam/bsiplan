@@ -43,6 +43,3 @@ router.post("/ModificarRolPersona/", (req, res) => {
   });
 
 module.exports = router;
-
-/*producto: asesoramiento en anulación de justificativos del año 2021
-no debe realizarse las anulaciones */

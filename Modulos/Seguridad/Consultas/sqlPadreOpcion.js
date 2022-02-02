@@ -16,6 +16,22 @@ module.exports.PadreOpcion = async function (callback) {
   }
 };
 
+//Lista Padre Opción que se encuentren activos en el sistema
+module.exports.PadreOpcionActivos = async function (callback) {
+  try {
+    const response = await pool.pool.query(
+      "select * from seguridad.padre_opcion where pop_estado=1 order by pop_codigo;"
+    );
+    if (response.rowCount > 0) {
+      callback(true, response.rows);
+    } else {
+      callback(false);
+    }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+  }
+};
+
 //Ingreso de Padre Opción 
 module.exports.IngresarPadreOpcion = async function (req, callback) {
   try {

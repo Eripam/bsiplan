@@ -20,6 +20,24 @@ router.get("/ListaOpcion", (req, res) => {
   }
 });
 
+// Servicio Listar Opción activos
+router.get("/ListaOpcionActivos", (req, res) => {
+  var lstOpc = null;
+  try {
+    opc.OpcionActivos((err, opc) => {
+      lstOpc = opc;
+      if (lstOpc == null) {
+        salida = false;
+      } else {
+        salida = true;
+      }
+      return res.json({ success: salida, data: opc });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 //Servicios ingresar Opción
 router.post("/IngresarOpcion/", (req, res) => {
   try {

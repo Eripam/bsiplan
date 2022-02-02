@@ -16,6 +16,22 @@ module.exports.Opcion = async function (callback) {
   }
 };
 
+//Lista de Opción que se encuentren registrados en el sistema activos
+module.exports.OpcionActivos = async function (callback) {
+  try {
+    const response = await pool.pool.query(
+      "select * from seguridad.opciones where opc_estado=1 order by opc_codigo;"
+    );
+    if (response.rowCount > 0) {
+      callback(true, response.rows);
+    } else {
+      callback(false);
+    }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+  }
+};
+
 //Ingreso de Opción 
 module.exports.IngresarOpcion = async function (req, callback) {
   try {
