@@ -12,7 +12,7 @@ pool
   .connect()
   .then(
     (console.log("*****************************"),
-    console.log("Conexión exitosa a Base de Datos PostgreSQL"),
+    console.log("Conexión exitosa a Base de Datos Seguridad PostgreSQL"),
     console.log("*****************************"))
   )
   .catch((err) =>

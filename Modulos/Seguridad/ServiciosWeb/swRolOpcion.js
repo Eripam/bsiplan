@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const rop = require('../Consultas/sqlRolOpciones');
+const { route } = require("./swUsuarios");
 
 // Servicio Listar Rol Opción
 router.get("/ListaRolOpcion", (req, res) => {
@@ -19,6 +20,24 @@ router.get("/ListaRolOpcion", (req, res) => {
     return res.json({ success: false, info: error });
   }
 });
+
+//Servicios Listar rol opciones
+router.post("/ListaOpcionRol", (req, res)=>{
+  var lstOpR=null;
+  try {
+    rop.OpcionesRol(req, (err, rop)=>{
+      lstOpR=rop;
+      if(lstOpR==null){
+        salida=false;
+      }else{
+        salida=true;
+      }
+      return res.json({success:salida, data:rop});
+    });
+  } catch (error) {
+    return res.json({success:false, info:error});
+  }
+})
 
 //Servicios ingresar Rol Opción
 router.post("/IngresarRolOpcion/", (req, res) => {

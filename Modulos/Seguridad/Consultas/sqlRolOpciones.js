@@ -16,6 +16,25 @@ module.exports.RolOpcion = async function (callback) {
   }
 };
 
+//Lista de opciones por rol
+module.exports.OpcionesRol = async function (req, callback) {
+  var opcionrol=[];
+  try {
+    const response = await pool.pool.query("select distinct on(rop_padreop) rop_padreop, pop_nombre, pop_icono from (select * from seguridad.rol_opcion inner join seguridad.padre_opcion on pop_codigo=rop_padreop where rop_rol='"+req.body.rol+"' and pop_estado=1)as con");
+    if (response.rowCount > 0) {
+      for(var i=0; i<response.rowCount; i++){
+        const responseA= await pool.pool.query("select distinct on(opc_codigo) opc_codigo, opc_nombre, opc_url from (select * from seguridad.rol_opcion inner join seguridad.padre_opcion on pop_codigo=rop_padreop join seguridad.opciones on opc_codigo=rop_opcion where rop_rol='"+req.body.rol+"' and opc_estado=1 and rop_padreop='"+response.rows[i].rop_padreop+"')as con");
+        opcionrol.push({"rop_padreop":response.rows[i].rop_padreop, "pop_nombre":response.rows[i].pop_nombre, "pop_icono":response.rows[i].pop_icono, "rop_opciones":responseA.rows});
+      }
+      callback(true, opcionrol);
+    } else {
+      callback(false);
+    }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+  }
+};
+
 //Ingreso de Rol-Opción 
 module.exports.IngresarRolOpcion = async function (req, callback) {
   try {

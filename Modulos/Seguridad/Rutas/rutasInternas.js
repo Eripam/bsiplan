@@ -13,6 +13,7 @@ const opciones = require('../ServiciosWeb/swOpciones');
 const rolopcion= require('../ServiciosWeb/swRolOpcion');
 const reglamento = require('../ServiciosWeb/swReglamento');
 const regOpcion= require('../ServiciosWeb/swRegOpcion');
+const login = require('../ServiciosWeb/swLogin');
 
 //Enlaces para acceder a los servicios
 //Rutas Centralizada
@@ -28,5 +29,6 @@ app.use('/opciones', opciones);
 app.use('/rolopcion', rolopcion);
 app.use('/reglamento', reglamento);
 app.use('/regopc', regOpcion);
+app.use('/login', login);
 
 module.exports=app;
