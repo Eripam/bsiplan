@@ -64,4 +64,20 @@ module.exports.RolesActivos = async function (callback) {
     console.log("Error: " + error.stack);
   }
 };
+
+  //Lista roles activos
+  module.exports.RolesActivosD = async function (callback) {
+    try {
+      const response = await pool.pool.query(
+        "select * from seguridad.rol where rol_estado=1 and rol_codigo<>5 order by rol_codigo"
+      );
+      if (response.rowCount > 0) {
+        callback(true, response.rows);
+      } else {
+        callback(false);
+      }
+    } catch (error) {
+      console.log("Error: " + error.stack);
+    }
+  };
   

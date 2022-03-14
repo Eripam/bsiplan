@@ -97,6 +97,22 @@ module.exports.DependenciaAc = async function (callback) {
   }
 };
 
+//Lista dependencia que se encuentren activas y pertencezcan a una determinada
+module.exports.DependenciaPert = async function (req, callback) {
+  try {
+    const response = await pool.pool.query(
+      "select * from seguridad.dependencia where dep_estado=1 and (dep_codcodigo='"+req.body.codigo+"' or dep_codigo='"+req.body.codigo+"') order by dep_codigo"
+    );
+    if (response.rowCount > 0) {
+      callback(true, response.rows);
+    } else {
+      callback(false);
+    }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+  }
+};
+
 //Ingreso de dependencia 
 module.exports.IngresarDependencia = async function (req, callback) {
   try {
@@ -118,7 +134,7 @@ module.exports.IngresarDependencia = async function (req, callback) {
 module.exports.ModificarDependencia = async function (req, callback) {
   try {
     const response = await pool.pool.query(
-      "UPDATE seguridad.dependencia SET dep_nombre='" +req.body.dep_nombre +"', dep_estado='"+req.body.dep_estado+"', dep_codcodigo='"+req.body.dep_codcodigo+"', dep_alias='"+req.body.dep_alias+"' where dep_codigo='" +req.body.dep_codigo +"';");
+      "UPDATE seguridad.dependencia SET dep_nombre='" +req.body.dep_nombre +"', dep_estado='"+req.body.dep_estado+"', dep_codcodigo='"+req.body.dep_codcodigo+"', dep_alias='"+req.body.dep_alias+"', dep_tipo='"+req.body.dep_tipo+"' where dep_codigo='" +req.body.dep_codigo +"';");
     if (response.rowCount > 0) {
       callback(true);
     } else {

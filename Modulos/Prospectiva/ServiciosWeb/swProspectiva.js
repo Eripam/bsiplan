@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const prosp = require('../Consultas/sqlProspectiva');
+const auth=require('../../Seguridad/Config/auth');
 
 // Servicio Listar Prospectiva
-router.get("/ListaProspectiva", (req, res) => {
+router.post("/ListaProspectiva", auth, (req, res) => {
   var lstPros = null;
   try {
-    prosp.Prospectivas((err, prosp) => {
+    prosp.Prospectivas(req, (err, prosp) => {
         lstPros = prosp;
       if (lstPros == null) {
         salida = false;
@@ -20,10 +21,32 @@ router.get("/ListaProspectiva", (req, res) => {
   }
 });
 
+// Servicio Listar Prospectiva existe
+router.get("/ListaProspectivaExiste", auth, (req, res) => {
+  try {
+    prosp.ProspectivasExiste((err, prosp) => {
+      return res.json({ success: true, data: prosp[0].exists });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 //Servicios ingresar Prospectiva
-router.post("/IngresarProspectiva/", (req, res) => {
+router.post("/IngresarProspectiva/", auth, (req, res) => {
   try {
     prosp.IngresarProspectiva(req, function (data) {
+      return res.json({ success: data });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
+//Servicios Modificar Prospectiva
+router.post("/ModificarProspectiva/", auth, (req, res) => {
+  try {
+    prosp.ModificarProspectiva(req, function (data) {
       return res.json({ success: data });
     });
   } catch (error) {

@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const roles = require("../Consultas/sqlRol");
+const auth=require('../../Seguridad/Config/auth');
 
 // Servicio Listar Roles
-router.get("/ListaRoles", (req, res) => {
+router.get("/ListaRoles", auth, (req, res) => {
   var lstRoles = null;
   try {
     roles.Roles((err, roles) => {
@@ -21,7 +22,7 @@ router.get("/ListaRoles", (req, res) => {
 });
 
 //Servicios ingresar roles
-router.post("/IngresarRol/", (req, res) => {
+router.post("/IngresarRol/", auth, (req, res) => {
   try {
     roles.IngresarRol(req, function (data) {
       return res.json({ success: data });
@@ -47,6 +48,24 @@ router.get("/ListaRolesActivos", (req, res) => {
   var lstRoles = null;
   try {
     roles.RolesActivos((err, roles) => {
+      lstRoles = roles;
+      if (lstRoles == null) {
+        salida = false;
+      } else {
+        salida = true;
+      }
+      return res.json({ success: salida, data: roles });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
+// Servicio Listar Roles activos
+router.get("/ListaRolesActivosD", (req, res) => {
+  var lstRoles = null;
+  try {
+    roles.RolesActivosD((err, roles) => {
       lstRoles = roles;
       if (lstRoles == null) {
         salida = false;

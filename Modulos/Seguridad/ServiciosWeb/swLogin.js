@@ -4,6 +4,25 @@ const login = require('../Consultas/sqlLogin');
 const jwt = require('jsonwebtoken');
 const JWT_Secret = 'S!pl@n1';
 const moment=require("moment");
+const auth=require('../Config/auth');
+
+/*const authenticateJWT = (req, res, next) => {
+  console.log("cdcdc");
+  const authHeader = req.headers.authorization;
+
+  if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      jwt.verify(token, JWT_Secret, (err, user) => {
+          if (err) {
+              return res.sendStatus(403);
+          }
+          req.user = user;
+          next();
+      });
+  } else {
+      res.sendStatus(401);
+  }
+};*/
 
 // Servicio Login
 router.post("/Login", (req, res) => {
@@ -92,7 +111,7 @@ router.post("/DLogin", (req, res) => {
 });
 
 // Servicio Listar Perfil
-router.post("/ListarPerfil", (req, res) => {
+router.post("/ListarPerfil", auth,(req, res) => {
   var lstPerfil = null;
   try {
     login.ListaPerfil(req,(err, perfiles) => {
@@ -110,7 +129,7 @@ router.post("/ListarPerfil", (req, res) => {
 });
 
 // Servicio Verificar si existe perfiles
-router.post("/VerificarOpcion", (req, res) => {
+router.post("/VerificarOpcion", auth, (req, res) => {
   try {
     login.RegistradoPagina(req, function (data) {
       return res.json({ success: data });
@@ -119,22 +138,5 @@ router.post("/VerificarOpcion", (req, res) => {
     return res.json({ success: false, info: error });
   }
 });
-
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization']
-  const token = authHeader && authHeader.split(' ')[1]
-
-  if (token == null) return res.sendStatus(401)
-
-  jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
-    console.log(err)
-
-    if (err) return res.sendStatus(403)
-
-    req.user = user
-
-    next()
-  })
-}
 
 module.exports=router;

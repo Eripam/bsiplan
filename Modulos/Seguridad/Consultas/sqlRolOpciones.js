@@ -24,7 +24,7 @@ module.exports.OpcionesRol = async function (req, callback) {
     if (response.rowCount > 0) {
       for(var i=0; i<response.rowCount; i++){
         const responseA= await pool.pool.query("select distinct on(opc_codigo) opc_codigo, opc_nombre, opc_url from (select * from seguridad.rol_opcion inner join seguridad.padre_opcion on pop_codigo=rop_padreop join seguridad.opciones on opc_codigo=rop_opcion where rop_rol='"+req.body.rol+"' and opc_estado=1 and rop_padreop='"+response.rows[i].rop_padreop+"')as con");
-        opcionrol.push({"rop_padreop":response.rows[i].rop_padreop, "pop_nombre":response.rows[i].pop_nombre, "pop_icono":response.rows[i].pop_icono, "rop_opciones":responseA.rows});
+        opcionrol.push({"rop_padreop":response.rows[i].rop_padreop, "pop_codigo":response.rows[i].rop_padreop, "pop_nombre":response.rows[i].pop_nombre, "pop_icono":response.rows[i].pop_icono, "rop_opciones":responseA.rows});
       }
       callback(true, opcionrol);
     } else {
@@ -67,3 +67,18 @@ module.exports.ModificarRolOpcion = async function (req, callback) {
       callback(false);
     }
   };
+
+  //Lista de opciones por rol, usuario y dependencia
+module.exports.OpcionesRolUsuario = async function (req, callback) {
+  var opcionrol=[];
+  try {
+    const response = await pool.pool.query("select * from seguridad.rol_opcion where rop_rol='"+req.body.rol+"' and rop_opcion='"+req.body.opcion+"' and rop_padreop='"+req.body.padreop+"';");
+    if (response.rowCount > 0) {
+      callback(true, response.rows);
+    } else {
+      callback(false);
+    }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+  }
+};

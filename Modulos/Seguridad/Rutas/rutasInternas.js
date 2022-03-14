@@ -14,6 +14,7 @@ const rolopcion= require('../ServiciosWeb/swRolOpcion');
 const reglamento = require('../ServiciosWeb/swReglamento');
 const regOpcion= require('../ServiciosWeb/swRegOpcion');
 const login = require('../ServiciosWeb/swLogin');
+const auditoria = require('../ServiciosWeb/swAuditoria');
 
 //Enlaces para acceder a los servicios
 //Rutas Centralizada
@@ -30,5 +31,6 @@ app.use('/rolopcion', rolopcion);
 app.use('/reglamento', reglamento);
 app.use('/regopc', regOpcion);
 app.use('/login', login);
+app.use('/auditoria', auditoria);
 
 module.exports=app;

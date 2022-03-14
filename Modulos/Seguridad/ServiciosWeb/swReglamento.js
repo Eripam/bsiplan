@@ -4,10 +4,11 @@ const reglamento = require('../Consultas/sqlReglamento');
 const multer = require('multer');
 const fs = require('fs');
 var url='C:/var';
+const auth=require('../../Seguridad/Config/auth');
 let com=0;
 
 // Servicio Listar Roles
-router.get("/ListaCodigo", (req, res) => {
+router.get("/ListaCodigo", auth, (req, res) => {
   try {
     reglamento.codigoR((err, reglamento) => {
       return res.json({data: reglamento });
@@ -18,7 +19,7 @@ router.get("/ListaCodigo", (req, res) => {
 });
 
 // Servicio Listar Reglamentos
-router.get("/ListaReglamentos", (req, res) => {
+router.get("/ListaReglamentos", auth,  (req, res) => {
   var lstReg = null;
   try {
     reglamento.Reglamentos((err, reglamento) => {
@@ -36,7 +37,7 @@ router.get("/ListaReglamentos", (req, res) => {
 });
 
 // Servicio Listar Reglamentos
-router.get("/ListaReglamentosAc", (req, res) => {
+router.get("/ListaReglamentosAc", auth, (req, res) => {
   var lstReg = null;
   try {
     reglamento.ReglamentoActivos((err, reglamento) => {
@@ -67,7 +68,7 @@ const storage = multer.diskStorage({
 });
 
 // Servicio Listar Reglamentos
-router.post("/CodigoModificar", (req, res) =>{
+router.post("/CodigoModificar", auth, (req, res) =>{
   var codigo=req.body.reg_codigo;
   console.log("URL codifo "+codigo);
   if(codigo>0){
@@ -140,7 +141,7 @@ router.post('/eliminararchivo', (req, res)=>{
 });
 
 //Servicios ingresar Reglamento
-router.post("/IngresarReglamento/", (req, res) => {
+router.post("/IngresarReglamento/", auth, (req, res) => {
   var count=0, result;
   try {
     reglamento.IngresarReglamento(req, function (data) {
@@ -162,7 +163,7 @@ router.post("/IngresarReglamento/", (req, res) => {
 });
 
 //Servicios modificar Reglamento
-router.post("/ModificarReglamento/", (req, res) => {
+router.post("/ModificarReglamento/", auth, (req, res) => {
   var count=0, result;
   try {
     reglamento.ModificarReglamento(req, function (data) {
@@ -186,7 +187,7 @@ router.post("/ModificarReglamento/", (req, res) => {
 });
 
 //Servicios Eliminar archivo base de datos
-router.post("/EliminarArchivoBD/", (req, res) => {
+router.post("/EliminarArchivoBD/", auth, (req, res) => {
   var count=0, result;
   try {
     reglamento.SumaArchivos(req.body.rar_reglamento, function (data) {

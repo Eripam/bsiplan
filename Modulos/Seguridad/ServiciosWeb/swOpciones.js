@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const opc = require('../Consultas/sqlOpcion');
+const auth=require('../../Seguridad/Config/auth');
 
 // Servicio Listar Opción
-router.get("/ListaOpcion", (req, res) => {
+router.get("/ListaOpcion", auth,(req, res) => {
   var lstOpc = null;
   try {
     opc.Opcion((err, opc) => {
@@ -21,7 +22,7 @@ router.get("/ListaOpcion", (req, res) => {
 });
 
 // Servicio Listar Opción activos
-router.get("/ListaOpcionActivos", (req, res) => {
+router.get("/ListaOpcionActivos", auth,(req, res) => {
   var lstOpc = null;
   try {
     opc.OpcionActivos((err, opc) => {
@@ -39,7 +40,7 @@ router.get("/ListaOpcionActivos", (req, res) => {
 });
 
 //Servicios ingresar Opción
-router.post("/IngresarOpcion/", (req, res) => {
+router.post("/IngresarOpcion/", auth, (req, res) => {
   try {
     opc.IngresarOpcion(req, function (data) {
       return res.json({ success: data });
@@ -50,7 +51,7 @@ router.post("/IngresarOpcion/", (req, res) => {
 });
 
 //Servicios modificar Opción
-router.post("/ModificarOpcion/", (req, res) => {
+router.post("/ModificarOpcion/", auth,(req, res) => {
     try {
       opc.ModificarOpcion(req, function (data) {
         return res.json({ success: data });

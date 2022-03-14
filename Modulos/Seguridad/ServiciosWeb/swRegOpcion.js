@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const ropc = require('../Consultas/sqlReglamentoOp');
+const auth=require('../../Seguridad/Config/auth');
 
 // Servicio Listar Reglamentos Opción
-router.get("/ListaRegOp", (req, res) => {
+router.get("/ListaRegOp", auth, (req, res) => {
   var lstRopc = null;
   try {
     ropc.ReglamentoOp((err, ropc) => {
@@ -21,7 +22,7 @@ router.get("/ListaRegOp", (req, res) => {
 });
 
 //Servicios ingresar Reglamentos Opción
-router.post("/IngresarRegOpcion/", (req, res) => {
+router.post("/IngresarRegOpcion/", auth, (req, res) => {
   try {
     ropc.IngresarRegOp(req, function (data) {
       return res.json({ success: data });
@@ -32,7 +33,7 @@ router.post("/IngresarRegOpcion/", (req, res) => {
 });
 
 //Servicios modificar Reglamento Opción
-router.post("/ModificarRegOpcion/", (req, res) => {
+router.post("/ModificarRegOpcion/", auth, (req, res) => {
     try {
     ropc.ModificarRegOp(req, function (data) {
         return res.json({ success: data });

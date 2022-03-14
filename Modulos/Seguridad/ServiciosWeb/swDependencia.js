@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const tdep = require('../Consultas/sqlDependencia');
+const auth=require('../../Seguridad/Config/auth');
 
 // Servicio Listar Tipo dependencias
-router.get("/ListaTipoDep", (req, res) => {
+router.get("/ListaTipoDep", auth, (req, res) => {
   var lstTDep = null;
   try {
     tdep.TipoDependencia((err, tdep) => {
@@ -21,7 +22,7 @@ router.get("/ListaTipoDep", (req, res) => {
 });
 
 // Servicio Listar Tipo dependencias activas
-router.get("/ListaTipoDepActivas", (req, res) => {
+router.get("/ListaTipoDepActivas", auth,(req, res) => {
   var lstTDep = null;
   try {
     tdep.TipoDependenciaActivo((err, tdep) => {
@@ -39,7 +40,7 @@ router.get("/ListaTipoDepActivas", (req, res) => {
 });
 
 //Servicios ingresar tipo dependencia
-router.post("/IngresarTipoDep/", (req, res) => {
+router.post("/IngresarTipoDep/", auth,(req, res) => {
   try {
     tdep.IngresarTipoDependencia(req, function (data) {
       return res.json({ success: data });
@@ -50,7 +51,7 @@ router.post("/IngresarTipoDep/", (req, res) => {
 });
 
 //Servicios modificar tipo dependencia
-router.post("/ModificarTipoDep/", (req, res) => {
+router.post("/ModificarTipoDep/", auth,(req, res) => {
     try {
       tdep.ModificarTipoDependencia(req, function (data) {
         return res.json({ success: data });
@@ -61,7 +62,7 @@ router.post("/ModificarTipoDep/", (req, res) => {
   });
 
 // Servicio Listar dependencias
-router.get("/ListaDependencia", (req, res) => {
+router.get("/ListaDependencia", auth,(req, res) => {
   var lstDep = null;
   try {
     tdep.Dependencia((err, tdep) => {
@@ -79,7 +80,7 @@ router.get("/ListaDependencia", (req, res) => {
 });
 
 // Servicio Listar dependencias activas
-router.get("/ListaDependenciaActivas", (req, res) => {
+router.get("/ListaDependenciaActivas", auth,(req, res) => {
   var lstDep = null;
   try {
     tdep.DependenciaAc((err, tdep) => {
@@ -96,8 +97,26 @@ router.get("/ListaDependenciaActivas", (req, res) => {
   }
 });
 
+//Servicio Listar Dependencias que pertenecen
+router.post("/ListaDependenciaPertenece", auth, (req, res)=>{
+  var lstDep = null;
+  try {
+    tdep.DependenciaPert(req, (err, tdep) => {
+      lstDep = tdep;
+      if (lstDep == null) {
+        salida = false;
+      } else {
+        salida = true;
+      }
+      return res.json({ success: salida, data: tdep });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+})
+
 //Servicios ingresar tipo dependencia
-router.post("/IngresarDependencia/", (req, res) => {
+router.post("/IngresarDependencia/", auth,(req, res) => {
   try {
     tdep.IngresarDependencia(req, function (data) {
       return res.json({ success: data });
@@ -108,7 +127,7 @@ router.post("/IngresarDependencia/", (req, res) => {
 });
 
 //Servicios modificar dependencia
-router.post("/ModificarDependencia/", (req, res) => {
+router.post("/ModificarDependencia/", auth,(req, res) => {
   try {
     tdep.ModificarDependencia(req, function (data) {
       return res.json({ success: data });
