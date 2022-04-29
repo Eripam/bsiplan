@@ -110,6 +110,28 @@ router.post("/DLogin", (req, res) => {
   }
 });
 
+// Servicio Login
+router.post("/LoginCorreoNube", (req, res) => {
+  var lstLog = null;
+  var token=null;
+  try {
+    login.DatosCorreoNube(req, (err, log) => {
+        lstLog = log;
+      if (lstLog == null) {
+        salida = false;
+        token=null;
+      } else {
+        salida = true;
+        var value=log;
+        token=jwt.sign({value}, JWT_Secret, { expiresIn: "1h", });
+      }
+      return res.json({ success: salida, token:token });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 // Servicio Listar Perfil
 router.post("/ListarPerfil", auth,(req, res) => {
   var lstPerfil = null;

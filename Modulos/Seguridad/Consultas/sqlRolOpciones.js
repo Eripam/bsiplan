@@ -72,7 +72,7 @@ module.exports.ModificarRolOpcion = async function (req, callback) {
 module.exports.OpcionesRolUsuario = async function (req, callback) {
   var opcionrol=[];
   try {
-    const response = await pool.pool.query("select * from seguridad.rol_opcion where rop_rol='"+req.body.rol+"' and rop_opcion='"+req.body.opcion+"' and rop_padreop='"+req.body.padreop+"';");
+    const response = await pool.pool.query("select * from seguridad.rol_opcion join seguridad.opciones on rop_opcion=opc_codigo join seguridad.padre_opcion on pop_codigo=rop_padreop where rop_rol='"+req.body.rol+"' and rop_opcion='"+req.body.opcion+"' and rop_padreop='"+req.body.padreop+"';");
     if (response.rowCount > 0) {
       callback(true, response.rows);
     } else {

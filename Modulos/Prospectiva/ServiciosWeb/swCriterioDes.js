@@ -21,6 +21,42 @@ router.post("/ListaCriteriosDesc", auth,(req, res) => {
   }
 });
 
+// Servicio Listar Criterios descripción
+router.post("/ListaAccionesSeleccionadas", auth,(req, res) => {
+  var lstCri = null;
+  try {
+    crit.AccionesSeleccionadas(req, (err, prosp) => {
+        lstCri = prosp;
+      if (lstCri == null) {
+        salida = false;
+      } else {
+        salida = true;
+      }
+      return res.json({ success: salida, data: prosp });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
+// Servicio Listar Criterios descripción
+router.post("/ListaAccionesSeleccionadasUsuario", auth,(req, res) => {
+  var lstCri = null;
+  try {
+    crit.AccionesSeleccionadasUsuario(req, (err, prosp) => {
+        lstCri = prosp;
+      if (lstCri == null) {
+        salida = false;
+      } else {
+        salida = true;
+      }
+      return res.json({ success: salida, data: prosp });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 
 //Servicios ingresar Criterios Descripción
 router.post("/IngresarCriterioDesc/", auth,(req, res) => {
@@ -99,6 +135,36 @@ router.post("/ModificarAccion/", auth,(req, res) => {
     }
 });
 
+//Servicios seleccionar Acciones
+router.post("/SeleccionarAccion/", auth,(req, res) => {
+  try {
+    crit.SeleccionarAccion(req, function (data) {
+      return res.json({ success: data });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
+//Servicios seleccionar Acciones
+router.post("/AccionesResultados/", auth,(req, res) => {
+  var lstCri=null;
+  try {
+    crit.AccionesResultados(req, (err, prosp) =>{
+        lstCri = prosp;
+      lstCri = prosp;
+      if (lstCri == null) {
+        salida = false;
+      } else {
+        salida = true;
+      }
+      return res.json({ success: salida, data: prosp });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 //Servicios modificar Utopia
 router.post("/ModificarUtopia/", auth,(req, res) => {
   try {
@@ -147,6 +213,17 @@ router.post("/ValidacionEliminacionCon", auth, (req, res) => {
 router.post("/ValidacionEliminacionAcc", auth, (req, res) => {
   try {
     crit.ValidacionEliminacionAcc(req, (err, prosp) => {
+      return res.json({ success: true, data: prosp[0].exists });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
+//Servicio de validación de utopias
+router.post("/ValidacionEliminacionUtopia", auth, (req, res) => {
+  try {
+    crit.ValidacionEliminacionUtopia(req, (err, prosp) => {
       return res.json({ success: true, data: prosp[0].exists });
     });
   } catch (error) {

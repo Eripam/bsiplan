@@ -1,4 +1,5 @@
 const pool = require("../Config/conBaseDatos");
+var request = require('request');
 
 //Lista de Reglamentos que se encuentren registrados en el sistema
 module.exports.Reglamentos = async function (callback) {
@@ -129,4 +130,32 @@ module.exports.EliminarArchivos = async function (req, callback) {
     console.log("Error: " + error.stack);
     callback(false);
   }
+};
+
+module.exports.getToken = async (res) => {
+  request.post(
+    {
+      url:'https://login.microsoftonline.com/organizations/',
+      form: {
+        client_id: "598a77c2-45d2-4168-8075-e03832ad0ba4",
+        redirect_uri: 'https://localhost:4200',
+        client_secret: "~La7Q~D0sksSkIahrau5XlrrGGpdsXBKhnd5V",
+        tenant_id:"d7f86710-01e1-461d-8599-758de4542e2b",
+        scope:"openid",
+        grant_type: 'password',
+        username:"pruebas.ugdsi@espoch.edu.ec",
+        password:"D3s4rr0ll0"
+      },
+    }, function (err, httpResponse, body) {
+      if (err) {
+        console.log({ Message: err.message });
+      } else {
+        //let response = JSON.parse(body);
+        console.log("vfvfvf");
+        console.log(body);
+       //console.log({ Body: JSON.parse(body) });
+       //callback(true, JSON.parse(body));
+      }
+    }
+  )
 };

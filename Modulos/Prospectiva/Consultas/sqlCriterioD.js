@@ -1,18 +1,31 @@
 const pool= require('../Config/conBaseDatos');
 
-
 //Lista criterios descripción que se encuentren registrados en el sistema
 module.exports.CriteriosDescripcion = async function (req, callback) {
     var criterio=[];
     try {
-
-        const response = await pool.pool.query(
-            "select * from prospectiva.criterio_descripcion inner join prospectiva.criterio on cdes_criterio=cri_id where cri_prospectiva='"+req.body.cri_prospectiva+"' and cdes_estado=1 order by cdes_id;"
-          );
+      var response, ban;
+      if(req.body.tipo==1){
+        response = await pool.pool.query(
+          "select * from prospectiva.criterio_descripcion inner join prospectiva.criterio on cdes_criterio=cri_id where cri_prospectiva='"+req.body.cri_prospectiva+"' and cdes_estado=1 order by cdes_id;");
+        }else if(req.body.tipo==2){
+          response = await pool.pool.query(
+            "select distinct on(cdes_id) cdes_id, cdes_criterio, cdes_cdesid, cdes_descripcion, cdes_clon, cdes_cambio from(select * from prospectiva.criterio_descripcion inner join prospectiva.criterio on cdes_criterio=cri_id join prospectiva.accion on cdes_id=acc_cdes where cri_prospectiva='"+req.body.cri_prospectiva+"' and cdes_estado=1 and acc_estado=1 order by cdes_id) as con;");
+        }else{
+        response = await pool.pool.query(
+          "select distinct on(cdes_id) cdes_id, cdes_criterio, cdes_cdesid, cdes_descripcion, cdes_clon, cdes_cambio from(select * from prospectiva.criterio_descripcion inner join prospectiva.criterio on cdes_criterio=cri_id join prospectiva.accion on cdes_id=acc_cdes where cri_prospectiva='"+req.body.cri_prospectiva+"' and cdes_estado=1 and acc_estado=2 order by cdes_id) as con;");
+      }
         if (response.rowCount > 0) {
           for(var i=0; i<response.rowCount; i++){
+            var responseA;
+            if(req.body.tipo==1){
+              responseA= await pool.pool.query("select * from prospectiva.accion where (acc_estado=1 or acc_estado=2) and acc_cdes='"+response.rows[i].cdes_id+"' order by acc_id;");
+            }else if(req.body.tipo==2){
+              responseA= await pool.pool.query("select * from prospectiva.accion where acc_estado=1 and acc_cdes='"+response.rows[i].cdes_id+"' order by acc_id;");
+            }else{
+              responseA= await pool.pool.query("select * from prospectiva.accion where acc_estado=2 and acc_cdes='"+response.rows[i].cdes_id+"' order by acc_id;");
+            }
             const responseC= await pool.pool.query("select * from prospectiva.consecuencia where con_estado=1 and con_cdes='"+response.rows[i].cdes_id+"' order by con_id;");
-            const responseA= await pool.pool.query("select * from prospectiva.accion where acc_estado=1 and acc_cdes='"+response.rows[i].cdes_id+"' order by acc_id;");
             const responseU= await pool.pool.query("select * from prospectiva.utopia where uto_estado=1 and uto_cridescripcion='"+response.rows[i].cdes_id+"' order by uto_id;");
             criterio.push({"cdes_id":response.rows[i].cdes_id, "cdes_criterio":response.rows[i].cdes_criterio, "cdes_cdesid":response.rows[i].cdes_cdesid, "cdes_descripcion":response.rows[i].cdes_descripcion, "consecuencias":responseC.rows,"acciones":responseA.rows, "utopias":responseU.rows});
           }
@@ -24,6 +37,53 @@ module.exports.CriteriosDescripcion = async function (req, callback) {
       console.log("Error: " + error.stack);
     }
   };
+
+  //Lista prospectivas activa institucional
+module.exports.AccionesSeleccionadas = async function (req, callback) {
+  try {
+    const response = await pool.pool.query("select * from prospectiva.accion inner join prospectiva.criterio_descripcion on acc_cdes=cdes_id join prospectiva.criterio on cdes_criterio=cri_id left join prospectiva.encuesta_valores on acc_id=enc_acc where acc_estado=2 and cri_prospectiva='"+req.body.codigo+"' order by acc_id;");
+    if (response.rowCount > 0) {
+      callback(true, response.rows);
+    } else {
+      callback(false);
+    }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+  }
+};
+
+  //Lista prospectivas activa institucional
+  module.exports.AccionesSeleccionadasUsuario = async function (req, callback) {
+    try {
+      const response = await pool.pool.query("select * from prospectiva.f_listaAccionesValores('"+req.body.codigo+"', '"+req.body.usuario+"')");
+      if (response.rowCount > 0) {
+        callback(true, response.rows);
+      } else {
+        callback(false);
+      }
+    } catch (error) {
+      console.log("Error: " + error.stack);
+    }
+  };
+
+  //Lista criterios descripción que se encuentren registrados en el sistema
+module.exports.AccionesResultados = async function (req, callback) {
+  var criterio=[];
+  try {
+      const response = await pool.pool.query("select distinct on (cri_id) cri_id, cri_nombre, cri_fase from(select * from prospectiva.accion join prospectiva.criterio_descripcion on acc_cdes=cdes_id inner join prospectiva.criterio on cdes_criterio=cri_id where cri_prospectiva='"+req.body.prospectiva+"' and cdes_estado=1 and acc_estado=2 order by cri_id)as con;");
+      if (response.rowCount > 0) {
+        for(var i=0; i<response.rowCount; i++){
+          const responseA= await pool.pool.query("select * from prospectiva.accion join prospectiva.criterio_descripcion on acc_cdes=cdes_id inner join prospectiva.criterio on cdes_criterio=cri_id left join prospectiva.tabulacion on acc_id=tab_acc where cri_prospectiva='"+req.body.prospectiva+"' and cdes_estado=1 and acc_estado=2 and cri_id='"+response.rows[i].cri_id+"' and tab_acc is null order by acc_id;");
+          criterio.push({"cri_id":response.rows[i].cri_id, "cri_nombre":response.rows[i].cri_nombre, "cri_fase":response.rows[i].cri_fase, "acciones":responseA.rows});
+        }
+        callback(true, criterio);
+      } else {
+        callback(false);
+      }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+  }
+};
 
 //Ingreso de Criterios descripcion 
 module.exports.IngresarCriteriosDes = async function (req, callback) {
@@ -144,6 +204,23 @@ module.exports.ModificarCriteriosDes = async function (req, callback) {
     }
 };
 
+ //Seleccionar de Acciones 
+ module.exports.SeleccionarAccion = async function (req, callback) {
+  try {
+      const response = await pool.pool.query(
+        "UPDATE prospectiva.accion SET acc_estado='"+req.body.estado+"' where acc_id=" +req.body.codigo +";"
+      );
+      if (response.rowCount > 0) {
+        callback(true);
+      } else {
+        callback(false);
+      }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+    callback(false);
+  }
+};
+
  //Modificar de Utopias 
  module.exports.ModificarUtopias = async function (req, callback) {
   try {
@@ -219,6 +296,21 @@ module.exports.EliminarCriterioD = async function (req, callback) {
  module.exports.ValidacionEliminacionAcc = async function (req, callback) {
   try {
       const response = await pool.pool.query("select exists(select * from prospectiva.accion where acc_accionid='"+req.body.codigo+"');");
+      if (response.rowCount > 0) {
+        callback(true, response.rows);
+      } else {
+        callback(false);
+      }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+    callback(false);
+  }
+};
+
+ //Validacion de eliminación utopia 
+ module.exports.ValidacionEliminacionUtopia = async function (req, callback) {
+  try {
+      const response = await pool.pool.query("select exists(select * from prospectiva.utopia where uto_utoid='"+req.body.codigo+"');");
       if (response.rowCount > 0) {
         callback(true, response.rows);
       } else {
