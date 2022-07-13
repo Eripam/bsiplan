@@ -16,5 +16,7 @@ app.use(express.json());
 
 app.use(require("./Modulos/Seguridad/Rutas/rutasInternas"));
 app.use(require("./Modulos/Prospectiva/Rutas/rutasInternas"));
+app.use(require("./Modulos/Reportes/Rutas/rutasInternas"));
+app.use(require("./Modulos/Estrategico/Rutas/rutasInternas"));
 
 module.exports=app;

@@ -57,6 +57,24 @@ router.get("/ListaFases", auth, (req, res) => {
   }
 });
 
+// Servicio Listar Tipo Criterios
+router.get("/ListaFasesGenerar", auth, (req, res) => {
+  var lstCri = null;
+  try {
+    crit.TipoCriteriosGenerar(req, (err, prosp) => {
+        lstCri = prosp;
+      if (lstCri == null) {
+        salida = false;
+      } else {
+        salida = true;
+      }
+      return res.json({ success: salida, data: prosp });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 //Servicios ingresar Criterios
 router.post("/IngresarCriterio/", auth,(req, res) => {
   try {
@@ -79,6 +97,17 @@ router.post("/IngresarEncabezados/", auth,(req, res) => {
     }
   });
 
+  //Servicios ingresar respuesta
+router.post("/IngresarRespuesta/", auth,(req, res) => {
+  try {
+    crit.IngresarRespuesta(req, function (data) {
+      return res.json({ success: data });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 //Servicios Modificar Criterios
 router.post("/ModificarCriterio/", auth,(req, res) => {
   try {
@@ -94,6 +123,28 @@ router.post("/ModificarCriterio/", auth,(req, res) => {
 router.post("/ModificarEncabezado/", auth,(req, res) => {
   try {
     crit.ModificarEncabezado(req, function (data) {
+      return res.json({ success: data });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
+//Servicios Modificar Respuesta
+router.post("/ModificarRespuesta/", auth,(req, res) => {
+  try {
+    crit.ModificarRespuesta(req, function (data) {
+      return res.json({ success: data });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
+//Servicios Eliminar Respuesta
+router.post("/EliminarRespuesta/", auth,(req, res) => {
+  try {
+    crit.EliminarRespuesta(req, function (data) {
       return res.json({ success: data });
     });
   } catch (error) {

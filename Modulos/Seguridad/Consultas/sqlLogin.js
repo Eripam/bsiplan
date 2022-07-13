@@ -65,7 +65,7 @@ module.exports.ListaPerfil = async function (req, callback) {
 //Esta registrado ese usuario para acceder a la pagina
 module.exports.RegistradoPagina = async function (req, callback) {
   try {
-    const response = await pool.pool.query("select exists(select * from seguridad.vLogin inner join seguridad.rol_opcion on rpe_rol=rop_rol where rpe_persona like '"+req.body.rpe_persona+"' and rpe_rol='"+req.body.rpe_rol+"' and rop_opcion='"+req.body.rop_opcion+"' and rpe_dependencia='"+req.body.rpe_dependencia+"');");
+    const response = await pool.pool.query("select exists(select * from seguridad.vLogin inner join seguridad.rol_opcion on rpe_rol=rop_rol where rpe_persona like '"+req.body.rpe_persona+"' and rpe_rol='"+req.body.rpe_rol+"' and rop_opcion='"+req.body.rop_opcion+"' and rpe_dependencia='"+req.body.rpe_dependencia+"' and rop_estado=1);");
     if (response.rows[0].exists) {
       callback(true);
     } else {

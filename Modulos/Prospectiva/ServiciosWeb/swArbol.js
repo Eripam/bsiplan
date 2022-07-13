@@ -21,6 +21,24 @@ router.post("/ListarTipoArbol", auth, (req, res) => {
   }
 });
 
+// Servicio Listar tipo de árbol completo
+router.post("/ListarTipoArbolC", auth, (req, res) => {
+  var lstResp = null;
+  try {
+    arbol.TipoArbolC(req, (err, resp) => {
+      lstResp = resp;
+      if (lstResp == null) {
+        salida = false;
+      } else {
+        salida = true;
+      }
+      return res.json({ success: salida, data: resp });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 // Servicio Listar estructura árbol
 router.post("/ListarEstructuraArbol", auth, (req, res) => {
   var lstResp = null;
@@ -33,6 +51,17 @@ router.post("/ListarEstructuraArbol", auth, (req, res) => {
         salida = true;
       }
       return res.json({ success: salida, data: resp });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
+// Servicio Modificar tipo árbol
+router.post("/IngresarTipoArbol", auth, (req, res) => {
+  try {
+    arbol.IngresarTipoArbol(req, function (data) {
+      return res.json({ success: data });
     });
   } catch (error) {
     return res.json({ success: false, info: error });
@@ -57,6 +86,17 @@ router.post("/IngresarArbol", auth, (req, res) => {
       });
       }
     })
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
+// Servicio Modificar tipo de árbol
+router.post("/ModificarTipoArbol", auth, (req, res) => {
+  try {
+    arbol.ModificarTipoArbol(req, function (data) {
+      return res.json({ success: data });
+    });
   } catch (error) {
     return res.json({ success: false, info: error });
   }
@@ -94,5 +134,17 @@ router.post("/EliminarArbolID", auth, (req, res) => {
     return res.json({ success: false, info: error });
   }
 });
+
+// Servicio Eliminar Tipo árbol
+router.post("/EliminarTipoArbol", auth, (req, res) => {
+  try {
+    arbol.EliminarTipoArbol(req, function (data) {
+      return res.json({ success: data });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 
 module.exports=router;

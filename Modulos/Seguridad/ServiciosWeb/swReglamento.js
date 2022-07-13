@@ -5,10 +5,11 @@ const multer = require('multer');
 const fs = require('fs');
 var url='C:/var';
 const auth=require('../../Seguridad/Config/auth');
-const oneDriveAPI = require("onedrive-api");
 var request = require('request');
 var async = require('async');
 var mime = require('mime');
+const Stream = require('stream');
+const { Readable } = require("stream");
 //const onedrive_json_configFile = fs.readFileSync('./config/onedrive.json', 'utf8');
 //const onedrive_json_config = JSON.parse(onedrive_json_configFile);
 //const onedrive_refresh_token = onedrive_json_config.refresh_token
@@ -126,31 +127,12 @@ const uploadM = multer({
        res.json({mensaje:"Archivo subido"});
 });*/
 
-
-
-
-const conexion={
-  url: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
-  form: {
-    redirect_uri: 'https://localhost:4200',
-    client_id: "598a77c2-45d2-4168-8075-e03832ad0ba4",
-    client_secret: "~La7Q~D0sksSkIahrau5XlrrGGpdsXBKhnd5V",
-    //refresh_token: onedrive_refresh_token,
-    grant_type: 'authorization_code'
-  }
-}
-
-
-
-
-
-
-var file = "C:/Users/WinUser/Documents/correosPlanificacion.pdf";
-var refresh_token = "#####";
+//Variables para subir archivos
+/*var file = "C:/Users/WinUser/Downloads/ESPOCH-DSI-DTIC-2022-0190-O.pdf";
 var onedrive_folder = 'SampleFolder'; // Folder on OneDrive
-var onedrive_filename = file; // If you want to change the filename on OneDrive, please set this.
+var onedrive_filename = 'ESPOCH-DSI-DTIC-2022-0190-O.pdf'; // If you want to change the filename on OneDrive, please set this.
 
-
+//Servicios para subir archivos
 function resUpload(){
   request.post({
       url: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
@@ -193,7 +175,7 @@ function uploadFile(uploadUrl) { // Here, it uploads the file by every chunk.
           callback();
       }, st.stime);
   });
-}
+}*/
 
 function getparams(){
   var allsize = fs.statSync(file).size;
@@ -216,21 +198,31 @@ function getparams(){
   return ar;
 }
 
+/*
 //Prueba para subir al onedrive
 function fileprueba(){
 request.post({
-  url: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
-  form: {
-      client_id: "598a77c2-45d2-4168-8075-e03832ad0ba4",
-      client_secret: "~La7Q~D0sksSkIahrau5XlrrGGpdsXBKhnd5V",
-      redirect_uri: 'https://localhost:4200',
-      refresh_token: reglamento.getToken(),
-      grant_type: 'refresh_token'
-  },
+  url:'https://login.microsoftonline.com/d7f86710-01e1-461d-8599-758de4542e2b/oauth2/token',
+      form: {
+        client_id: "598a77c2-45d2-4168-8075-e03832ad0ba4",
+        //redirect_uri: 'https://localhost:4200',
+        client_secret: "~La7Q~D0sksSkIahrau5XlrrGGpdsXBKhnd5V",
+        //tenant_id:"d7f86710-01e1-461d-8599-758de4542e2b",
+        scope:"openid",
+        grant_type: 'password',
+        username:"pruebas.ugdsi@espoch.edu.ec",
+        password:"D3s4rr0ll0",
+        resource:"https://graph.microsoft.com"
+      },
 }, function(error, response, body) {
   fs.readFile(file, function read(e, f) {
+
+    console.log("Impresión F");
+    var imageAsBase64 = fs.readFileSync(file, 'base64');
+    //console.log(base64_encode(onedrive_filename));
+    console.log(imageAsBase64);
       request.put({
-          url: 'https://graph.microsoft.com/v1.0/drive/root:/' + onedrive_folder + '/' + onedrive_filename + ':/content',
+          url: 'https://graph.microsoft.com/v1.0/me/drive/root:/' + onedrive_folder + '/' + onedrive_filename+':/content',
           headers: {
               'Authorization': "Bearer " + JSON.parse(body).access_token,
               'Content-Type': mime.getType(file), // When you use old version, please modify this to "mime.lookup(file)",
@@ -243,9 +235,25 @@ request.post({
 });
 }
 
+function base64_encode(file) {
+  // read binary data
+  var bitmap = fs.readFileSync(file);
+  // convert binary data to base64 encoded string
+  return new Buffer(bitmap).toString('base64');
+}*/
+
 //Ruta en donde se sube los archivos
-router.post('/archivo', upload.array('demo'), (req, res)=>{
-  res.json({mensaje:"Archivo subido"});
+router.post('/archivo', (req, res)=>{
+  /*reglamento.getToken((err, prosp) => {
+    //console.log(prosp.refresh_token);
+    //res.json({salida:true, data:prosp});
+    
+    fileprueba2(prosp.access_token); 
+  });*/
+  console.log(req);
+  fileprueba();
+
+  //res.json({mensaje:"Archivo subido"});
 });
 
 //Ruta en donde se sube los archivos

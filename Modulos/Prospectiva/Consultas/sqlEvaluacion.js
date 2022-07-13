@@ -1,9 +1,24 @@
 const pool = require("../Config/conBaseDatos");
 
-//Lista criterios que se encuentren registrados en el sistema
+//Lista respuesta encuentren registrados en el sistema
+module.exports.RespuestaCompleta = async function (req, callback) {
+  try {
+    const response = await pool.pool.query("select *, CASE when res_estado=1 then 'Activo' when res_estado=0 then 'Inactivo' end res_estado_nombre from prospectiva.respuesta where res_prospectiva='"+req.body.codigo+"' order by res_id");
+    
+    if (response.rowCount > 0) {
+      callback(true, response.rows);
+    } else {
+      callback(false);
+    }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+  }
+};
+
+//Lista respuesta que se encuentren registrados en el sistema
 module.exports.Respuesta = async function (req, callback) {
   try {
-    const response = await pool.pool.query("select * from prospectiva.respuesta where res_estado=1 and res_prospectiva='"+req.body.codigo+"' order by res_id");
+    const response = await pool.pool.query("select *, CASE when res_estado=1 then 'Activo' when res_estado=0 then 'Inactivo' end res_estado_nombre from prospectiva.respuesta where res_estado=1 and res_prospectiva='"+req.body.codigo+"' order by res_id");
     
     if (response.rowCount > 0) {
       callback(true, response.rows);
@@ -33,7 +48,7 @@ module.exports.Tiempo = async function (req, callback) {
 //Existe evaluación enviada 
 module.exports.EncuestaEnviada=async function(req, callback){
   try {
-    const response = await pool.pool.query("select * from prospectiva.estado_encuesta where esen_usuario like '"+req.body.codigo+"';");
+    const response = await pool.pool.query("select * from prospectiva.estado_encuesta where esen_usuario like '"+req.body.codigo+"' and esen_prospectiva='"+req.body.prospectiva+"';");
     if (response.rowCount > 0) {
       callback(true, response.rows);
     } else {
@@ -53,8 +68,10 @@ module.exports.ListarResultados=async function(req, callback){
       response= await pool.pool.query("select * from prospectiva.f_accionesresultados('"+req.body.codigo+"') left join prospectiva.tabulacion on accid=tab_acc where tab_acc is null;");
     }else if(req.body.tipo==2){
       response= await pool.pool.query("select * from prospectiva.f_accionesresultados('"+req.body.codigo+"') inner join prospectiva.accion on accid=acc_id left join prospectiva.tabulacion on accid=tab_acc where tab_acc is null and total>='"+req.body.umbral+"' order by total desc;");
-    }else{
+    }else if(req.body.tipo==3){
       response= await pool.pool.query("select tab_acc, tab_valor_total, tab_estado, acc_id, acc_cdes, acc_descripcion, acc_clon, acc_cambio, acc_estado, acc_accionid, cdes_id, cdes_criterio, cdes_cdesid, cdes_descripcion, cdes_clon, cdes_cambio, cdes_estado, cri_id, cri_prospectiva,cri_nombre, cri_clon, cri_estado, cri_fase, estr_id, estr_descripcion, estr_clon, estr_cambio, estr_accion, estr_prospectiva, (case when estr_tipo is null then 0 else estr_tipo end) estr_tipo from prospectiva.tabulacion inner join prospectiva.accion on tab_acc=acc_id join prospectiva.criterio_descripcion on acc_cdes=cdes_id join prospectiva.criterio on cdes_criterio=cri_id left join prospectiva.estructura_arbol on acc_id=estr_accion where cri_prospectiva='"+req.body.codigo+"' order by tab_valor_total desc;");
+    }else if(req.body.tipo==4){
+      response= await pool.pool.query("select * from prospectiva.tabulacion inner join prospectiva.accion on tab_acc=acc_id join prospectiva.criterio_descripcion on acc_cdes=cdes_id join prospectiva.criterio on cdes_criterio=cri_id left join prospectiva.accion_ejes on acc_id=aeje_accion where cri_prospectiva='"+req.body.codigo+"' and aeje_accion is null order by acc_id desc;");
     }
     if(response.rowCount>0){
       callback(true, response.rows);
@@ -64,6 +81,20 @@ module.exports.ListarResultados=async function(req, callback){
   } catch (error) {
     console.log("Error: " + error.stack);
     callback(false);
+  }
+}
+
+//Listado de acciones para modificar en ejes estratégicos
+module.exports.ListarAccionesEjes=async function(req, callback){
+  try {
+    const response= await pool.pool.query("select * from prospectiva.tabulacion inner join prospectiva.accion on tab_acc=acc_id join prospectiva.criterio_descripcion on acc_cdes=cdes_id join prospectiva.criterio on cdes_criterio=cri_id left join prospectiva.accion_ejes on acc_id=aeje_accion where cri_prospectiva='"+req.body.codigo+"' and (aeje_eje='"+req.body.eje+"' or aeje_eje is null) order by acc_id desc;");
+    if (response.rowCount > 0) {
+      callback(true, response.rows);
+    } else {
+      callback(false);
+    }
+  } catch (error) {
+    console.log("Error: " + error.stack);
   }
 }
 
@@ -100,7 +131,7 @@ module.exports.IngresarTabulacion = async function (req, callback) {
 //Ingresar encuesta estado
 module.exports.IngresarEncuestaEstado = async function (req, callback) {
   try {
-    const response = await pool.pool.query("INSERT INTO prospectiva.estado_encuesta(esen_usuario, esen_estado, esen_rol) VALUES ('"+req.body.esen_usuario+"', '"+req.body.esen_estado+"', '"+req.body.esen_rol+"');");
+    const response = await pool.pool.query("INSERT INTO prospectiva.estado_encuesta(esen_usuario, esen_estado, esen_rol, esen_prospectiva) VALUES ('"+req.body.esen_usuario+"', '"+req.body.esen_estado+"', '"+req.body.esen_rol+"', '"+req.body.esen_prospectiva+"');");
     if (response.rowCount > 0) {
       callback(true);
     } else {

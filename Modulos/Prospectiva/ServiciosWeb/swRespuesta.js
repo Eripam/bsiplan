@@ -3,6 +3,24 @@ const router = express.Router();
 const respuesta = require('../Consultas/sqlEvaluacion');
 const auth=require('../../Seguridad/Config/auth');
 
+// Servicio Listar Respuestas
+router.post("/ListaRespuestaC", auth, (req, res) => {
+  var lstResp = null;
+  try {
+    respuesta.RespuestaCompleta(req, (err, resp) => {
+      lstResp = resp;
+      if (lstResp == null) {
+        salida = false;
+      } else {
+        salida = true;
+      }
+      return res.json({ success: salida, data: resp });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 // Servicio Listar Prospectiva
 router.post("/ListaRespuesta", auth, (req, res) => {
   var lstResp = null;
@@ -129,6 +147,24 @@ router.post("/ListaRespuestaEn", auth, (req, res) => {
   var lstResp = null;
   try {
     respuesta.ListarResultados(req, (err, prosp) => {
+      lstResp = prosp;
+      if (lstResp == null) {
+        salida = false;
+      } else {
+        salida = true;
+      }
+      return res.json({ success: salida, data: prosp });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
+//Servicio de validación de encuestas enviadas
+router.post("/ListarAccionesEjes", auth, (req, res) => {
+  var lstResp = null;
+  try {
+    respuesta.ListarAccionesEjes(req, (err, prosp) => {
       lstResp = prosp;
       if (lstResp == null) {
         salida = false;

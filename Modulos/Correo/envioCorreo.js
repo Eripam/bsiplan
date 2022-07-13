@@ -1,6 +1,8 @@
 //Requerimos el paquete
 const express = require("express");
 const router = express.Router();
+const email=require('./sqlenvioCorreo');
+const auth=require('../Seguridad/Config/auth');
 
 router.post("/envioCorreo", (req, res) => {
     var request = require('request');
@@ -21,6 +23,16 @@ router.post("/envioCorreo", (req, res) => {
             mensajes: body.mensaje
         });
     });
+});
+
+router.post('/IngresarEnviarE', auth, (req, res)=>{
+    try {
+        email.EnviarEmailGeneral(req, function (data) {
+          return res.json({ success: data });
+        });
+      } catch (error) {
+        return res.json({ success: false, info: error });
+      }
 });
 
 module.exports = router;

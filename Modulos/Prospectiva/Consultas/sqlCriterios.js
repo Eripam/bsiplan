@@ -40,6 +40,22 @@ module.exports.TipoCriterios = async function (req, callback) {
     const response = await pool.pool.query(
         "select * from prospectiva.fases where fase_estado=1 order by fase_id;"
       );
+    if (response.rowCount > 0) {
+      callback(true, response.rows);
+    } else {
+      callback(false);
+    }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+  }
+};
+
+//Lista tipo criterios que se encuentren registrados en el sistema
+module.exports.TipoCriteriosGenerar = async function (req, callback) {
+  try {
+    const response = await pool.pool.query(
+        "select * from prospectiva.fases where fase_estado=1 and fase_id<>3 order by fase_id;"
+      );
     
     if (response.rowCount > 0) {
       callback(true, response.rows);
@@ -85,6 +101,23 @@ module.exports.IngresarEncabezado = async function (req, callback) {
     }
   };
 
+  //Ingreso de respuestas 
+module.exports.IngresarRespuesta = async function (req, callback) {
+  try {
+      const response = await pool.pool.query(
+        "INSERT INTO prospectiva.respuesta(res_id, res_nombre, res_prospectiva, res_valor) VALUES ((select * from prospectiva.f_codigo_prospectiva(14)), '"+req.body.res_nombre+"', '"+req.body.res_prospectiva+"', '"+req.body.res_valor+"');"
+      );
+      if (response.rowCount > 0) {
+        callback(true);
+      } else {
+        callback(false);
+      }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+    callback(false);
+  }
+};
+
   //Modificar criterios 
 module.exports.ModificarCriterios = async function (req, callback) {
   try {
@@ -116,3 +149,43 @@ module.exports.ModificarEncabezado = async function (req, callback) {
     callback(false);
   }
 };
+
+  //Modificación de respuestas 
+  module.exports.ModificarRespuesta = async function (req, callback) {
+    try {
+        const response = await pool.pool.query(
+          "UPDATE prospectiva.respuesta SET res_nombre='"+req.body.res_nombre+"', res_prospectiva='"+req.body.res_prospectiva+"', res_valor='"+req.body.res_valor+"', res_estado='"+req.body.res_estado+"' WHERE res_id='"+req.body.res_id+"';"
+        );
+        if (response.rowCount > 0) {
+          callback(true);
+        } else {
+          callback(false);
+        }
+    } catch (error) {
+      console.log("Error: " + error.stack);
+      callback(false);
+    }
+  };
+
+  //Eliminación de respuestas 
+  module.exports.EliminarRespuesta = async function (req, callback) {
+    try {
+        const response = await pool.pool.query(
+          "DELETE FROM prospectiva.respuesta WHERE res_id='"+req.body.res_id+"';"
+        );
+        if (response.rowCount > 0) {
+          callback(true);
+        } else {
+          callback(false);
+        }
+    } catch (error) {
+      const response = await pool.pool.query(
+        "UPDATE prospectiva.respuesta SET res_estado=0 WHERE res_id='"+req.body.res_id+"';"
+      );
+      if (response.rowCount > 0) {
+        callback(true);
+      } else {
+        callback(false);
+      }
+    }
+  };

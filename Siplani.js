@@ -38,7 +38,7 @@ app.use(require("./app"));
 
 //credenciales para el https del servidor de windows
 var options = {
-  key: fs.readFileSync("Certificados/espoch_sectigo_key_2019.key"),
+  key: fs.readFileSync("Certificados/STAR_espoch_edu_ec.key"),
   cert: fs.readFileSync("Certificados/STAR_espoch_edu_ec.crt"),
   ca: fs.readFileSync("Certificados/STAR_espoch_edu_ec.crt"),
 };
