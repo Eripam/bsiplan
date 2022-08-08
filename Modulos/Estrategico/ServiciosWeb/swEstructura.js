@@ -24,6 +24,26 @@ router.post("/ListarEstructura", auth, (req, res) => {
   }
 });
 
+// Servicio Maximos orden
+router.post("/ListarMaximo", auth, (req, res) => {
+  var lstResp = null;
+  try {
+    est.MaximoEstructura(req, (err, resp) => {
+      lstResp = resp;
+      if (lstResp == null && !err) {
+        salida = false;
+      } else if(lstResp!=null && err){
+        salida = true;
+      }else{
+        salida='Error';
+      }
+      return res.json({ success: salida, data: resp });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 // Servicio Ingresar Estructura
 router.post("/IngresarEstructura", auth, (req, res) => {
   try {

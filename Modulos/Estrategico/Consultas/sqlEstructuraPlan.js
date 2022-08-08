@@ -1,3 +1,4 @@
+const { response } = require("express");
 const pool = require("../Config/conBaseDatos");
 
 //Listar estructura del plan
@@ -65,21 +66,61 @@ module.exports.ListarEstructuraPlanMapa = async function (req, callback){
 //Listar estrutura plan para hijos mapa
 module.exports.ListarEstructuraHijosMapa = async function(req, callback){
   try {
-    var hijos=[];
-    var codigo=-1;
-    const response = await pool.pool.query("select *, (select count(eplan_id) from estrategico.estructura_plan where eplan_eplan_id=eplan.eplan_id and eplan_estado=1) from estrategico.estructura_plan as eplan inner join estrategico.estructura on eplan.eplan_estructura=est_id where eplan.eplan_eplan_id='"+req.body.codigo+"' and eplan_estado=1;");
+    var respuesta=[];
+    const response = await pool.pool.query("select *, (select count(eplan_id) from estrategico.estructura_plan where eplan_eplan_id=eplan.eplan_id and eplan_estado=1), (est_codigo || '-'|| eplan.eplan_codigo) as codigo from estrategico.estructura_plan as eplan inner join estrategico.estructura on eplan.eplan_estructura=est_id where eplan.eplan_eplan_id='"+req.body.codigo+"' and eplan_estado=1;");
     if(response.rowCount>0){
-      while(codigo=-1 || codigo>0){
-        for(let resp of response.rows){
-          if(resp.count>0){
-            hijos.push({"eplan":eplan, "eplan_nombre":eplan_nombre, "eplan_codigo":eplan_codigo,"est_id":est_id, "est_nombre":est_nombre, "est_codigo":est_codigo})
+      for(let dat of response.rows){
+        if(dat.count>0){
+          var datos1=await listarHijos(dat.eplan_id);
+          var datos=[];
+          for(let dat2 of datos1){
+            if(dat2.count>0){
+              var datos3=await listarHijos(dat2.eplan_id);
+              var datos2=[];
+              for(let dat3 of datos3){
+                var datos5=[];
+                if(dat3.count>0){
+                  var datos4=await listarHijos(dat3.eplan_id);
+                  for(var i=0; i<datos4.length; i++){
+                    var datos6=[]
+                    if(datos4[i].count>0){
+                      var datos7=await listarHijos(datos4[i].eplan_id);
+                      for(let dat5 of datos7){
+                        datos6.push({"label":dat5.est_nombre, "type": 'person', "styleClass": 'p-person', "expanded": false, "data": {"eplan_id": dat5.eplan_id, "eplan_nombre":dat5.eplan_nombre, "eplan_codigo":dat5.codigo}});
+                      }
+                    }
+                    datos5.push({"label":datos4[i].est_nombre, "type": 'person', "styleClass": 'p-person', "expanded": false, "data": {"eplan_id": datos4[i].eplan_id, "eplan_nombre":datos4[i].eplan_nombre, "eplan_codigo":datos4[i].codigo}, "children":datos6});
+                  }
+                }
+                datos2.push({"label":dat3.est_nombre, "type": 'person', "styleClass": 'p-person', "expanded": false, "data": {"eplan_id": dat3.eplan_id, "eplan_nombre":dat3.eplan_nombre, "eplan_codigo":dat3.codigo}, "children":datos5});
+              }
+            }
+            datos.push({"label":dat2.est_nombre, "type": 'person', "styleClass": 'p-person', "expanded": false, "data": {"eplan_id": dat2.eplan_id, "eplan_nombre":dat2.eplan_nombre, "eplan_codigo":dat2.codigo}, "children":datos2});
           }
         }
+        respuesta.push({"label":dat.est_nombre, "type": 'person', "styleClass": 'p-person', "expanded": false, "data": {"eplan_id": dat.eplan_id, "eplan_nombre":dat.eplan_nombre, "eplan_codigo":dat.codigo}, "children": datos});
       }
+      callback(true, respuesta);
+    }else{
+      callback(false);
     }
   } catch (error) {
     console.log("Error: "+error.stack);
     callback(false);
+  }
+}
+
+async function listarHijos(dato){
+  try {
+    const response = await pool.pool.query("select *, (select count(eplan_id) from estrategico.estructura_plan where eplan_eplan_id=eplan.eplan_id and eplan_estado=1), (est_codigo || '-'|| eplan.eplan_codigo) as codigo from estrategico.estructura_plan as eplan inner join estrategico.estructura on eplan.eplan_estructura=est_id where eplan.eplan_eplan_id='"+dato+"' and eplan_estado=1 order by eplan_codigo;");
+    if(response.rowCount>0){
+      return(response.rows);
+    }else{
+      return(false);
+    }
+  } catch (error) {
+    console.log("Error: "+error.stack);
+    return(false);
   }
 }
 //Ingresar estructura plan

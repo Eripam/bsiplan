@@ -21,9 +21,9 @@ module.exports.ListarPlanes = async function (req, callback){
 }
 
 //Listar plan estrategico por dependencias
-module.exports.ListarPlanesDep = async function (req, callback){
+module.exports.ListarPlan = async function (req, callback){
     try {
-        const response = await pool.pool.query("SELECT *, case when plan_estado=1 then 'Activo' when plan_estado=0 then 'Inactivo' end as estadonombre  FROM estrategico.plan_estrategico where plan_dependencia='"+req.body.codigo+"';");
+        const response = await pool.pool.query("SELECT * FROM estrategico.plan_estrategico where plan_id='"+req+"' and plan_estado=1;");
         if(response.rowCount>0){
             callback(true, response.rows);
         }else{

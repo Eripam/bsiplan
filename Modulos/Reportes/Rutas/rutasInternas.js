@@ -3,8 +3,8 @@ const express=require('express');
 const app = express();
 
 //Importing Routes
-const pdf = require('../Servicios/pdfServicios');
+const pdf = require('../Servicios/Estrategico/pdfServicios');
 
-app.use('/pdf', pdf);
+app.use('/reporte', pdf);
 
 module.exports=app;

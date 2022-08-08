@@ -1,16 +1,16 @@
-const fs= require("fs");
-//const PDF = require("pdfkit");
-const PDF = require("pdfmake");
-const blobStream  = require('blob-stream');
-const iframe = require("node-iframe");
+module.exports.font=function(){
+  var fonts = {
+    Roboto: {
+        normal: __dirname+'../../Herramientas/fonts/Roboto-Regular.ttf',
+        bold: __dirname+'../../Herramientas/fonts/Roboto-Medium.ttf',
+        italics: __dirname+'../../Herramientas/fonts/Roboto-Italic.ttf',
+        bolditalics: __dirname+'../../Herramientas/fonts/Roboto-MediumItalic.ttf'
+    }
+  }
+  return fonts;
+}
 
-/*function header(doc){
-  doc.image(__dirname+'/img/Banderín.png', 20, 0, {fit: [100, 100], align: 'start', valign: 'center'}, doc.page.height-50);  
-  doc.image(__dirname+'/img/Espoch-Dtic.png', 70, 50);
-  doc.image(__dirname+'/img/Pie de página.png', 50, 730);
-}*/
-
-function header(){
+module.exports.header=function (){
   var columna=[{
     margin: [20, 0, 0, 0],
     alignment: 'start',
@@ -25,120 +25,20 @@ function header(){
   return columna;
 }
 
-function footer(){
+module.exports.footer=function (){
   var footer=[{
     margin: [180, 0, 0, 20],
     image:__dirname+'/img/Pie de página.png',
     width:250
   }]
-
   return footer;
 }
 
-module.exports.generarPDF=async function (req, res) {
-  var fonts = {
-    Roboto: {
-        normal: __dirname+'/fonts/Roboto-Regular.ttf',
-        bold: __dirname+'/fonts/Roboto-Medium.ttf',
-        italics: __dirname+'/fonts/Roboto-Italic.ttf',
-        bolditalics: __dirname+'/fonts/Roboto-MediumItalic.ttf'
-    }
-};
-  var doc = new PDF(fonts);
-  /*doc.pipe(res);
-  header(doc);
-  doc
-    .text('Reporte SISTEMA INTEGRAL DE PLANIFICACIÓN INSTITUCIONAL', 100, 300)
-    .font('Times-Roman', 36);
-  doc.end();
-  res.writeHead(200, {
-    'Content-Type': 'application/pdf',
-  });*/
-
-let content = [{
-    text: "Hello World",
-    alignment: 'center',
-    fontSize: 25
-}]
-
-for (let i = 0; i < 50; i++) {
-  content.push({
-      text: `${i}) a random test.. `
-  })
-}
-
-let table = {
-  // headers are automatically repeated if the table spans over multiple pages
-  // you can declare how many rows should be treated as headers
-  headerRows: 3,
-  widths: ['*', 'auto', 100, 60, 50, 60, 50],
-
-  body: [
-      [{
-          text: 'Name',
-          rowSpan: 3
-      }, {
-          text: 'Age',
-          rowSpan: 3
-      }, {
-          text: 'Gender',
-          rowSpan: 3
-      }, {
-          text: 'Mark',
-          alignment: 'center',
-          colSpan: 4
-      }, {}, {}, {}],
-      [{}, {}, {}, {
-          text: 'First Year',
-          alignment: 'center',
-          colSpan: 2
-      }, {}, {
-          text: 'Second year',
-          alignment: 'center',
-          colSpan: 2
-      }, {}],
-      [{}, {}, {}, {
-          text: 'Theory',
-          bold: true
-      }, {
-          text: 'Practical',
-          bold: true
-      }, {
-          text: 'Theory',
-      }, {
-          text: 'Practical',
-      }],
-      // now data and values
-      ['Ram', '32', 'Male', '90', '95', '80', '95'],
-      ['Sita', '30', 'Female', '95', '95', '80', '95'],
-      ['Laxman', '26', 'Male', '70', '90', '75', '90'],
-  ]
-}
-
-let headerfooterDoc = {
-  header: {
-    columns: header() 
-  },
-  footer: {
-      columns: footer()
-  },
-  content: content,
-  pageMargins: [72, 120, 72, 50],
-  pageOrientation:'portrait',
-  //orientación horizontal landscape
-}
-
-headerfooterDoc['content'].push({
-  text: "Table Now",
-  style: 'subheader'
-}, {
-  table: table
-})
-
-let pdfDoc = doc.createPdfKitDocument(headerfooterDoc, {});
-    pdfDoc.pipe(res);
-    pdfDoc.end();
-    res.writeHead(200, {
-      'Content-Type': 'application/pdf',
-    });
+module.exports.footerH=function (){
+  var footer=[{
+    margin: [300, 0, 0, 20],
+    image:__dirname+'/img/Pie de página.png',
+    width:240
+  }]
+  return footer;
 }

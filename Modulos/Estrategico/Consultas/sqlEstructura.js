@@ -20,6 +20,21 @@ module.exports.ListarEstructura = async function (req, callback){
     }
 }
 
+//Listar maximo
+module.exports.MaximoEstructura = async function(req, callback){
+  try {
+    const response=await pool.pool.query("select max(est_orden) from estrategico.estructura where est_plan='"+req.body.codigo+"' and est_estado=1;");
+    if(response.rowCount>0){
+      callback(true, response.rows);
+    }else{
+      callback(false);
+    }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+    callback(false);
+  }
+}
+
 //Ingresar estructura
 module.exports.IngresarEstructura = async function (req, callback){
     try {
