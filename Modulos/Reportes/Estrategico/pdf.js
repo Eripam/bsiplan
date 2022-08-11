@@ -59,11 +59,23 @@ for(let res of resultado){
   if(res.orden==0){
     row.push({text:res.nombre, colSpan:col.length+1, alignment:'left', fontSize:13 ,bold:true, fillColor:'#999999'});
   }else if(res.orden==1){
-    row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:12, fillColor:'#ADADAD'});
+    if(res.total>0 && res.total<100){
+      row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:12, fillColor:'#ADADAD', color:'red'});
+    }else{
+      row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:12, fillColor:'#ADADAD'});
+    }
   }else if(res.orden==2){
-    row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:11, fillColor:'#C2C2C2'});
+    if(res.total>0 && res.total<100){
+      row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:11, fillColor:'#C2C2C2', color:'red'});
+    }else{
+      row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:11, fillColor:'#C2C2C2'});
+    }
   }else{
-    row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:10});
+    if(res.total>0 && res.total<100){
+      row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:10, color:'red'});
+    }else{
+      row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:10});
+    }
   }
   for(let j=0; j<col.length; j++){
     const resultado2=await cronograma.ListarCronogramaAnio(res.codigoid, col[j]);

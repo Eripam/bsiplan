@@ -42,26 +42,26 @@ module.exports.ListarEstructuraCronograma = async function(req, callback){
                           var datos9=await listarHijos(dat5.eplan_id);
                           for(let dat6 of datos9){
                             var cron8=pool.pool.query("Select * from estrategico.cronograma where cro_eplan='"+dat6.eplan_id+"' order by cro_anio;");
-                            datos8.push({"data": {"tipo":dat6.est_nombre,"eplan_id": dat6.eplan_id, "eplan_nombre":dat6.eplan_nombre, "eplan_codigo":dat6.codigo, "orden":dat6.est_orden,"cronograma":(await cron8).rows}});
+                            datos8.push({"data": {"tipo":dat6.est_nombre,"eplan_id": dat6.eplan_id, "eplan_nombre":dat6.eplan_nombre, "eplan_codigo":dat6.codigo, "orden":dat6.est_orden, "suma":dat6.sum, "cronograma":(await cron8).rows}});
                           }
                         }
                         var cron7=pool.pool.query("Select * from estrategico.cronograma where cro_eplan='"+dat5.eplan_id+"' order by cro_anio;");
-                        datos6.push({"data": {"tipo":dat5.est_nombre,"eplan_id": dat5.eplan_id, "eplan_nombre":dat5.eplan_nombre, "eplan_codigo":dat5.codigo, "orden":dat5.est_orden,"cronograma":(await cron7).rows}, "children":datos8});
+                        datos6.push({"data": {"tipo":dat5.est_nombre,"eplan_id": dat5.eplan_id, "eplan_nombre":dat5.eplan_nombre, "eplan_codigo":dat5.codigo, "orden":dat5.est_orden, "suma":dat5.sum, "cronograma":(await cron7).rows}, "children":datos8});
                       }
                     }
                     var cron6=pool.pool.query("Select * from estrategico.cronograma where cro_eplan='"+datos4[i].eplan_id+"' order by cro_anio;");
-                    datos5.push({"data": {"tipo":datos4[i].est_nombre, "eplan_id": datos4[i].eplan_id, "eplan_nombre":datos4[i].eplan_nombre, "eplan_codigo":datos4[i].codigo, "orden":datos4[i].est_orden, "cronograma":(await cron6).rows},"children":datos6});
+                    datos5.push({"data": {"tipo":datos4[i].est_nombre, "eplan_id": datos4[i].eplan_id, "eplan_nombre":datos4[i].eplan_nombre, "eplan_codigo":datos4[i].codigo, "orden":datos4[i].est_orden, "suma":datos4[i].sum, "cronograma":(await cron6).rows},"children":datos6});
                   }
                 }
                 var cron5=pool.pool.query("Select * from estrategico.cronograma where cro_eplan='"+dat3.eplan_id+"' order by cro_anio;");
-                datos2.push({"data": {"tipo":dat3.est_nombre, "eplan_id": dat3.eplan_id, "eplan_nombre":dat3.eplan_nombre, "eplan_codigo":dat3.codigo, "orden":dat3.est_orden, "cronograma":(await cron5).rows},"children":datos5});
+                datos2.push({"data": {"tipo":dat3.est_nombre, "eplan_id": dat3.eplan_id, "eplan_nombre":dat3.eplan_nombre, "eplan_codigo":dat3.codigo, "orden":dat3.est_orden, "suma":dat3.sum, "cronograma":(await cron5).rows},"children":datos5});
               }
             }
             var cron4=pool.pool.query("Select * from estrategico.cronograma where cro_eplan='"+dat2.eplan_id+"' order by cro_anio;");
-            datos.push({"data": {"tipo":dat2.est_nombre, "eplan_id": dat2.eplan_id, "eplan_nombre":dat2.eplan_nombre, "eplan_codigo":dat2.codigo, "orden":dat2.est_orden, "cronograma":(await cron4).rows},"children":datos2});
+            datos.push({"data": {"tipo":dat2.est_nombre, "eplan_id": dat2.eplan_id, "eplan_nombre":dat2.eplan_nombre, "eplan_codigo":dat2.codigo, "orden":dat2.est_orden, "suma":dat2.sum, "cronograma":(await cron4).rows},"children":datos2});
           }
         var cron3=pool.pool.query("Select * from estrategico.cronograma where cro_eplan='0' order by cro_anio;");
-        respuesta.push({"data": {"tipo":dat.eje_nombre, "eplan_id": dat.eje_id, "eplan_nombre":dat.eje_nombre, "eplan_codigo":dat.codigo, "orden":0,"cronograma":(await cron3).rows},"children": datos});
+        respuesta.push({"data": {"tipo":dat.eje_nombre, "eplan_id": dat.eje_id, "eplan_nombre":dat.eje_nombre, "eplan_codigo":dat.codigo, "orden":0, "suma":dat.sum, "cronograma":(await cron3).rows},"children": datos});
       }
       callback(true, respuesta);
     }else{
@@ -75,7 +75,7 @@ module.exports.ListarEstructuraCronograma = async function(req, callback){
 
 async function listarHijosEje(dato){
   try {
-    const response = await pool.pool.query("select *, (select count(eplan_id) from estrategico.estructura_plan where eplan_eplan_id=eplan.eplan_id and eplan_estado=1), (est_codigo || '-'|| eplan.eplan_codigo) as codigo from estrategico.estructura_plan as eplan inner join estrategico.estructura on eplan.eplan_estructura=est_id where eplan.eplan_eje='"+dato+"' and eplan_estado=1 order by eplan_codigo;");
+    const response = await pool.pool.query("select *, (select count(eplan_id) from estrategico.estructura_plan where eplan_eplan_id=eplan.eplan_id and eplan_estado=1), (est_codigo || '-'|| eplan.eplan_codigo) as codigo, (select sum(cro_valor) from estrategico.cronograma where cro_eplan=eplan.eplan_id) from estrategico.estructura_plan as eplan inner join estrategico.estructura on eplan.eplan_estructura=est_id where eplan.eplan_eje='"+dato+"' and eplan_estado=1 order by eplan_codigo;");
     if(response.rowCount>0){
       return(response.rows);
     }else{
@@ -89,7 +89,7 @@ async function listarHijosEje(dato){
 
 async function listarHijos(dato){
   try {
-    const response = await pool.pool.query("select *, (select count(eplan_id) from estrategico.estructura_plan where eplan_eplan_id=eplan.eplan_id and eplan_estado=1), (est_codigo || '-'|| eplan.eplan_codigo) as codigo from estrategico.estructura_plan as eplan inner join estrategico.estructura on eplan.eplan_estructura=est_id where eplan.eplan_eplan_id='"+dato+"' and eplan_estado=1 order by eplan_codigo;");
+    const response = await pool.pool.query("select *, (select count(eplan_id) from estrategico.estructura_plan where eplan_eplan_id=eplan.eplan_id and eplan_estado=1), (est_codigo || '-'|| eplan.eplan_codigo) as codigo, (select sum(cro_valor) from estrategico.cronograma where cro_eplan=eplan.eplan_id) from estrategico.estructura_plan as eplan inner join estrategico.estructura on eplan.eplan_estructura=est_id where eplan.eplan_eplan_id='"+dato+"' and eplan_estado=1 order by eplan_codigo;");
     if(response.rowCount>0){
       return(response.rows);
     }else{
