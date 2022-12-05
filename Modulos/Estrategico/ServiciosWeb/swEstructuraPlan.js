@@ -118,6 +118,23 @@ router.post("/ModificarEstructuraPlanes", auth, (req, res) => {
   }
 });
 
+// Servicio Modificar Estructura Planes Indicadores
+router.post("/ModificarEstructuraPlanesIndicador", auth, (req, res) => {
+  try {
+    plan.ModificarEstructuraPlanIndicador(req, function (data) {
+      if(data){
+        aud.IngresarAuditoria(req, function(data){
+          return res.json({ success: data });
+        });
+      }else{
+        return res.json({ success: data });
+      }
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 //Servicio de validación eliminación
 router.post("/ValidarEstructuraPlanes", auth, (req, res) => {
   try {

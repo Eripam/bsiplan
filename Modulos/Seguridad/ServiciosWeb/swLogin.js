@@ -6,24 +6,6 @@ const JWT_Secret = 'S!pl@n1';
 const moment=require("moment");
 const auth=require('../Config/auth');
 
-/*const authenticateJWT = (req, res, next) => {
-  console.log("cdcdc");
-  const authHeader = req.headers.authorization;
-
-  if (authHeader) {
-      const token = authHeader.split(' ')[1];
-      jwt.verify(token, JWT_Secret, (err, user) => {
-          if (err) {
-              return res.sendStatus(403);
-          }
-          req.user = user;
-          next();
-      });
-  } else {
-      res.sendStatus(401);
-  }
-};*/
-
 // Servicio Login
 router.post("/Login", (req, res) => {
   var lstLog = null;

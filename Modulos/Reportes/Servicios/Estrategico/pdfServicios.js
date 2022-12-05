@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const pdf = require('../../Estrategico/pdf');
 const auth=require('../../../Seguridad/Config/auth');
-const fs = require('fs');
 
 router.get("/cronograma/:id", pdf.generarPDF);
 

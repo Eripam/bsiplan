@@ -36,72 +36,86 @@ await plan.ListarPlan(req.body.codigo, (err, resp) => {
   }
 });
 
+var periodo;
+await cronograma.ListarPeriodoPlanPeri(req.body.codigo, (err, resp)=>{
+  periodo=resp[0].per_maximo
+});
+
 var width=['*']
 var anio=[{}];
 for(var i=0; i<col.length; i++){
-  width.push(70);
+  width.push(40);
   anio.push({text:col[i], alignment: 'center',
   fillColor:'#858585',
-  bold:true});
+  bold:true, colSpan:periodo});
+}
+for(var i=0; i<col.length; i++){
+  width.push(40);
+  anio.push({text:col[i], alignment: 'center',
+  fillColor:'#858585',
+  bold:true, colSpan:periodo});
 }
 
 var encabezado=[];
-encabezado.push({text:'Nombre', rowSpan:2, alignment: 'center', fillColor:'#858585', bold:true}, 
-  {text: 'Programación Plurianual (%)', alignment: 'center', colSpan:col.length, alignment: 'center', fillColor:'#858585', bold:true});
-for(var i=0; i<col.length-1; i++){
+encabezado.push({text:'Nombre', rowSpan:3, alignment: 'center', fillColor:'#858585', bold:true}, 
+  {text: 'Programación Plurianual (%)', alignment: 'center', colSpan:(col.length*periodo), alignment: 'center', fillColor:'#858585', bold:true});
+for(var i=0; i<(col.length*periodo)-1; i++){
   encabezado.push({},);
 }
 
+var periodol=[{}];
+for(var j=0; j<col.length; j++){
+  for(var i=1; i<=periodo; i++){
+    var dato;
+    if(i==1){
+      dato='I';
+    }else if(i==2){
+      dato='II';
+    }else if(i==3){
+      dato='III';
+    }
+    periodol.push({text:dato, alignment: 'center', fillColor:'#858585', bold:true});
+  }
+}
 var resul=[]
 const resultado=await cronograma.ListarCronogramaPdf(req.body.codigo);
 for(let res of resultado){
   var row = new Array();
   if(res.orden==0){
-    row.push({text:res.nombre, colSpan:col.length+1, alignment:'left', fontSize:13 ,bold:true, fillColor:'#999999'});
+    row.push({text:res.nombre, colSpan:(col.length*periodo)+1, alignment:'left', fontSize:13 ,bold:true, fillColor:'#999999'});
   }else if(res.orden==1){
-    if(res.total>0 && res.total<100){
+    if(res.total<100){
       row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:12, fillColor:'#ADADAD', color:'red'});
     }else{
       row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:12, fillColor:'#ADADAD'});
     }
   }else if(res.orden==2){
-    if(res.total>0 && res.total<100){
+    if(res.total<100){
       row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:11, fillColor:'#C2C2C2', color:'red'});
     }else{
       row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:11, fillColor:'#C2C2C2'});
     }
   }else{
-    if(res.total>0 && res.total<100){
+    if(res.total<100){
       row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:10, color:'red'});
     }else{
       row.push({text:res.codigo+'.'+res.nombre, alignment:'left', fontSize:10});
     }
   }
-  for(let j=0; j<col.length; j++){
-    const resultado2=await cronograma.ListarCronogramaAnio(res.codigoid, col[j]);
-    if(resultado2){
-      for(let res2 of resultado2){
-        if(res.orden==1){
-          row.push({text:res2.cro_valor+'%', alignment:'center', fontSize:12, bold:true,fillColor:'#ADADAD'});
-        }else if(res.orden==2){
-          row.push({text:res2.cro_valor+'%', alignment:'center', fontSize:11, fillColor:'#C2C2C2'});
-        }else{
-          row.push({text:res2.cro_valor+'%', alignment:'center', fontSize:10});
-        }
-      }
-    }else{
-      if(res.orden==1){
-        row.push({text:'--', alignment:'center',fillColor:'#ADADAD', bold:true,fontSize:12});
-      }else if(res.orden==2){
-        row.push({text:'--', alignment:'center',fillColor:'#C2C2C2',fontSize:11});
-      }else{
-        row.push({text:'--', alignment:'center',fontSize:10});
-      }
+    const resultado2=await cronograma.ListarCronogramaAnio(res.codigoid, req.body.codigo);
+    for(let res2 of resultado2){
+       if(res.orden==1){
+         row.push({text:res2.cro_valor+'%', alignment:'center', fontSize:12, bold:true,fillColor:'#ADADAD'});
+       }else if(res.orden==2){
+         row.push({text:res2.cro_valor+'%', alignment:'center', fontSize:11, fillColor:'#C2C2C2'});
+       }else{
+         row.push({text:res2.cro_valor+'%', alignment:'center', fontSize:10});
+       }
     }
-  }
   if(resul.length==0){
     resul.push(encabezado);
     resul.push(anio);
+    resul.push(periodol);
     resul.push(row);
   }else{
     resul.push(row);
@@ -111,7 +125,7 @@ for(let res of resultado){
 let table = {
   // headers are automatically repeated if the table spans over multiple pages
   // you can declare how many rows should be treated as headers
-  headerRows: 2,
+  headerRows: 3,
   widths: width,
   body: 
     resul

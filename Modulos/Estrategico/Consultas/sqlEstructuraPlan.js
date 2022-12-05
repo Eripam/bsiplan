@@ -6,12 +6,14 @@ module.exports.ListarEstructuraPlan = async function (req, callback){
     try {
       var response;
         if(req.body.tipo==1){
-          response = await pool.pool.query("SELECT ep.eplan_id, ep.eplan_nombre, ep.eplan_plan, ep.eplan_estructura, ep.eplan_eplan_id, ep.eplan_estado, ep.eplan_depende, est.est_id, est.est_nombre, (est.est_codigo || '-'|| ep.eplan_codigo) as codigo, (est2.est_codigo || '-'||ep2.eplan_codigo) as codigopadre, eje_nombre, eje_id, est.est_orden, case when ep.eplan_estado=1 then 'Activo' when ep.eplan_estado=0 then 'Inactivo' end as estadonombre, (select count(eplan_id) from estrategico.estructura_plan where eplan_eplan_id=ep.eplan_id) FROM estrategico.estructura_plan as ep inner join estrategico.estructura as est on ep.eplan_estructura=est_id left join estrategico.estructura_plan as ep2 on ep.eplan_eplan_id=ep2.eplan_id left join estrategico.estructura as est2 on ep2.eplan_estructura=est2.est_id left join estrategico.eje_estrategico on ep.eplan_eje=eje_id where ep.eplan_plan='"+req.body.codigo+"' and ep.eplan_estructura='"+req.body.estructura+"' order by ep.eplan_estructura, ep.eplan_codigo;");
+          response = await pool.pool.query("SELECT ep.eplan_id, ep.eplan_nombre, ep.eplan_plan, ep.eplan_estructura, ep.eplan_eplan_id, ep.eplan_estado, ep.eplan_depende, est.est_id, est.est_nombre, (est.est_codigo || '-'|| ep.eplan_codigo) as codigo, (est2.est_codigo || '-'||ep2.eplan_codigo) as codigopadre, eje_nombre, eje_id, est.est_orden, case when ep.eplan_estado=1 then 'Activo' when ep.eplan_estado=0 then 'Inactivo' end as estadonombre, (select count(eplan_id) from estrategico.estructura_plan where eplan_eplan_id=ep.eplan_id), ep.eplan_indicador FROM estrategico.estructura_plan as ep inner join estrategico.estructura as est on ep.eplan_estructura=est_id left join estrategico.estructura_plan as ep2 on ep.eplan_eplan_id=ep2.eplan_id left join estrategico.estructura as est2 on ep2.eplan_estructura=est2.est_id left join estrategico.eje_estrategico on ep.eplan_eje=eje_id where ep.eplan_plan='"+req.body.codigo+"' and ep.eplan_estructura='"+req.body.estructura+"' order by ep.eplan_estructura, ep.eplan_codigo;");
         }else if(req.body.tipo==2){
-          response = await pool.pool.query("SELECT ep.eplan_id, ep.eplan_codigo, ep.eplan_nombre, est.est_codigo FROM estrategico.estructura_plan as ep inner join estrategico.estructura as est on ep.eplan_estructura=est_id where ep.eplan_plan='"+req.body.codigo+"'  and ep.eplan_estado=1 order by ep.eplan_estructura, ep.eplan_codigo;");
-        }else{
+          response = await pool.pool.query("SELECT ep.eplan_id, ep.eplan_codigo, ep.eplan_nombre, est.est_codigo, ep.eplan_indicador FROM estrategico.estructura_plan as ep inner join estrategico.estructura as est on ep.eplan_estructura=est_id where ep.eplan_plan='"+req.body.codigo+"'  and ep.eplan_estado=1 order by ep.eplan_estructura, ep.eplan_codigo;");
+        }else if(req.body.tipo==3){
           var orden=req.body.orden-1;
-          response = await pool.pool.query("SELECT ep.eplan_id, ep.eplan_codigo, ep.eplan_nombre, est.est_codigo FROM estrategico.estructura_plan as ep inner join estrategico.estructura as est on ep.eplan_estructura=est_id where ep.eplan_plan='"+req.body.codigo+"'  and ep.eplan_estado=1 and (est.est_orden='"+orden+"' or est.est_orden='"+req.body.orden+"') order by ep.eplan_estructura, ep.eplan_codigo;");
+          response = await pool.pool.query("SELECT ep.eplan_id, ep.eplan_codigo, ep.eplan_nombre, est.est_codigo, ep.eplan_indicador FROM estrategico.estructura_plan as ep inner join estrategico.estructura as est on ep.eplan_estructura=est_id where ep.eplan_plan='"+req.body.codigo+"'  and ep.eplan_estado=1 and (est.est_orden='"+orden+"' or est.est_orden='"+req.body.orden+"') order by ep.eplan_estructura, ep.eplan_codigo;");
+        }else{
+          response = await pool.pool.query("SELECT ep.eplan_id, ep.eplan_codigo, ep.eplan_nombre, est.est_codigo, ep.eplan_indicador FROM estrategico.estructura_plan as ep inner join estrategico.estructura as est on ep.eplan_estructura=est_id where ep.eplan_plan='"+req.body.codigo+"'  and ep.eplan_estado=1 and est.est_orden='"+req.body.orden+"' order by ep.eplan_estructura, ep.eplan_codigo;");
         }
         if(response.rowCount>0){
             callback(true, response.rows);
@@ -123,6 +125,7 @@ async function listarHijos(dato){
     return(false);
   }
 }
+
 //Ingresar estructura plan
 module.exports.IngresarEstructuraPlan = async function (req, callback){
     try {
@@ -211,7 +214,22 @@ module.exports.ModificarEstructuraPlan = async function (req, callback){
       }
 }
 
- //Validacion de eliminación de estructura planes
+//Modificar estructura plan indicador
+module.exports.ModificarEstructuraPlanIndicador = async function (req, callback){
+  try {
+      const response=await pool.pool.query("UPDATE estrategico.estructura_plan SET eplan_indicador='"+req.body.eplan_indicador+"' WHERE eplan_id='"+req.body.eplan_id+"';");
+      if (response.rowCount > 0) {
+          callback(true);
+        } else {
+          callback(false);
+        }
+  }  catch (error) {
+      console.log("Error: " + error.stack);
+      callback(false);
+    }
+}
+
+//Validacion de eliminación de estructura planes
  module.exports.ValidacionEliminacionEstructura = async function (req, callback) {
     try {
         const response = await pool.pool.query("select exists(select * from estrategico.estructura_plan where eplan_eplan_id='"+req.body.codigo+"');");
@@ -226,7 +244,7 @@ module.exports.ModificarEstructuraPlan = async function (req, callback){
     }
   };
 
-  //Eliminar estructura plan
+//Eliminar estructura plan
 module.exports.EliminarEstructuraPlan = async function (req, callback){
     try {
         const response = await pool.pool.query("DELETE FROM estrategico.estructura_plan WHERE eplan_id='"+req.body.eplan_id+"';");

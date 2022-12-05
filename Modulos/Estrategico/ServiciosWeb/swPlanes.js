@@ -24,6 +24,26 @@ router.post("/ListarPlanesCompletos", auth, (req, res) => {
   }
 });
 
+//Servicio Listar planes estratégicos completos
+router.post("/ListarPlanesActivos", auth, (req, res) => {
+  var lstResp = null;
+  try {
+    plan.ListarPlanesActivos(req, (err, resp) => {
+      lstResp = resp;
+      if (lstResp == null && !err) {
+        salida = false;
+      } else if(lstResp!=null && err){
+        salida = true;
+      }else{
+        salida='Error';
+      }
+      return res.json({ success: salida, data: resp });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 // Servicio Listar planes por dependencia
 router.post("/ListarPlanesDep", auth, (req, res) => {
   var lstResp = null;
