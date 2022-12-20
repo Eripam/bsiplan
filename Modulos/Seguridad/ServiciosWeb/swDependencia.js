@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const tdep = require('../Consultas/sqlDependencia');
+const resp = require('../../Estrategico/Consultas/sqlResponsables');
 const auth=require('../../Seguridad/Config/auth');
 
 // Servicio Listar Tipo dependencias
@@ -96,6 +97,63 @@ router.get("/ListaDependenciaActivas", auth,(req, res) => {
     return res.json({ success: false, info: error });
   }
 });
+
+// Servicio Listar dependencias por codigo
+router.post("/ListaDependenciaCodigo", auth,(req, res) => {
+  var lstDep = null;
+  try {
+    tdep.DependenciaCodigo(req, (err, tdep) => {
+      lstDep = tdep;
+      if (lstDep == null) {
+        salida = false;
+      } else {
+        salida = true;
+      }
+      return res.json({ success: salida, data: tdep });
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
+// Servicio Listar dependencias facultades y unidades administrativas
+router.post("/ListaDependenciaFacAdm", auth,(req, res) => {
+  var lstDep = null;
+  var listado=[];
+  try {
+    tdep.DependenciaFacAdm(req, (err, tdep) => {
+      lstDep = tdep;
+      if (lstDep == null) {
+        salida = false;
+      } else {
+        resp.ListarResponsables(req, (err, resp)=>{
+          if(resp!=null){
+            for(let dep of tdep){
+              for(let re of resp){
+                if(dep.dep_codigo!=re.replan_dependencia){
+                  if(!listado.includes(dep)){
+                    listado.push(dep);
+                  }
+                  if(!listado.includes(dep)){
+                    listado.push(dep);
+                  }
+                }
+              }
+            }
+            salida = true;
+            return res.json({ success: salida, data: listado });
+          }else{
+            salida = true;
+            return res.json({ success: salida, data: tdep });
+          }
+        })
+      }
+    });
+  } catch (error) {
+    return res.json({ success: false, info: error });
+  }
+});
+
 
 //Servicio Listar Dependencias que pertenecen
 router.post("/ListaDependenciaPertenece", auth, (req, res)=>{

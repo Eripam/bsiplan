@@ -97,6 +97,46 @@ module.exports.DependenciaAc = async function (callback) {
   }
 };
 
+//Lista nombre dependencia por código
+module.exports.DependenciaCodigo = async function (req, callback) {
+  try {
+    const response = await pool.pool.query(
+      "select * from seguridad.dependencia where dep_estado=1 and dep_codigo='"+req.body.dep_codigo+"';"
+    );
+    if (response.rowCount > 0) {
+      callback(true, response.rows);
+    } else {
+      callback(false);
+    }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+  }
+};
+
+
+//Lista dependencia facultades y unidades administrativas
+module.exports.DependenciaFacAdm = async function (req, callback) {
+  try {
+    let response;
+    if(req.body.tipo==1){
+      response = await pool.pool.query(
+        "select * from seguridad.dependencia where dep_estado=1 and (dep_tipo=2 or dep_tipo=4 or dep_tipo=5) order by dep_codigo"
+      );
+    }else{
+      response = await pool.pool.query(
+        "select * from seguridad.dependencia where dep_estado=1 and dep_codigo<>1 order by dep_codigo"
+      );
+    }
+    if (response.rowCount > 0) {
+      callback(true, response.rows);
+    } else {
+      callback(false);
+    }
+  } catch (error) {
+    console.log("Error: " + error.stack);
+  }
+};
+
 //Lista dependencia que se encuentren activas y pertencezcan a una determinada
 module.exports.DependenciaPert = async function (req, callback) {
   try {
