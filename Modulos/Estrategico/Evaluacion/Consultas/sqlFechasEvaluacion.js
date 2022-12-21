@@ -17,8 +17,9 @@ module.exports.ListarFechasA = async function (req, callback){
 
 //Ingresar fecha evaluación
 module.exports.IngresarFechaEval = async function (req, callback){
+  console.log(req.body);
     try {
-        const response = await pool.pool.query("INSERT INTO estrategico.fechas_evaluacion (feval_plan, feval_periodo, feval_fechai, feval_fechaf, feval_tipo, feval_anio, feval_prorroga) values('"+req.body.feval_plan+"', '"+req.body.feval_periodo+"', '"+req.body.feval_fechai+"', '"+req.body.feval_fechaf+"', '"+req.body.feval_tipo+"', '"+req.body.feval_anio+"', '"+req.body.feval_prorroga+"');");
+        const response = await pool.pool.query("select * from estrategico.f_ingresarfechas('"+req.body.feval_tipo+"', '"+req.body.feval_periodo+"', '"+req.body.feval_anio+"', '"+req.body.feval_fechai+"', '"+req.body.feval_fechaf+"');");
         if (response.rowCount > 0) {
             callback(true);
           } else {
