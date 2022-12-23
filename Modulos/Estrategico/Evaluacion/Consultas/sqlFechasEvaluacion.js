@@ -17,11 +17,10 @@ module.exports.ListarFechasA = async function (req, callback){
 
 //Ingresar fecha evaluación
 module.exports.IngresarFechaEval = async function (req, callback){
-  console.log(req.body);
     try {
         const response = await pool.pool.query("select * from estrategico.f_ingresarfechas('"+req.body.feval_tipo+"', '"+req.body.feval_periodo+"', '"+req.body.feval_anio+"', '"+req.body.feval_fechai+"', '"+req.body.feval_fechaf+"');");
         if (response.rowCount > 0) {
-            callback(true);
+            callback(true, response.rows);
           } else {
             callback(false);
           }
