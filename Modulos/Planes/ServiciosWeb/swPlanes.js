@@ -25,10 +25,10 @@ router.post("/ListarPlanes", auth, (req, res) => {
 });
 
 // Servicio Listar tipos planes
-router.post("/ListarTiposPlanes", auth, (req, res) => {
+router.get("/ListarTiposPlanes", auth, (req, res) => {
   var lstResp = null;
   try {
-    plan.ListarTipoPlan(req, (err, resp) => {
+    plan.ListarTipoPlan((err, resp) => {
       lstResp = resp;
       if (lstResp == null && !err) {
         salida = false;

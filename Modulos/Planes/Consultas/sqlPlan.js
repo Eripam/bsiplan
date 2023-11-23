@@ -21,7 +21,7 @@ module.exports.ListarPlanes = async function (req, callback){
 }
 
 //Listar tipo plan
-module.exports.ListarTipoPlan = async function (req, callback){
+module.exports.ListarTipoPlan = async function (callback){
     try {
         const response = await pool.pool.query("SELECT * FROM planes.tipo_plan where tplan_estado=1;");
         if(response.rowCount>0){
