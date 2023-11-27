@@ -38,7 +38,7 @@ module.exports.ListarTipoPlan = async function (callback){
 //Ingresar plan
 module.exports.IngresarPlan = async function (req, callback){
     try {
-        const response = await pool.pool.query("INSERT INTO planes.planes(plan_id, plan_nombre, plan_fecha_inicio, plan_fecha_fin, plan_tipoplan) VALUES (select * from planes.f_codigo_planes(1), '"+req.body.plan_nombre+"', '"+req.body.plan_fecha_inicio+"', '"+req.body.plan_fecha_fin+"', '"+RolesAnywhere.body.plan_tipoplan+"');");
+        const response = await pool.pool.query("INSERT INTO planes.planes(plan_id, plan_nombre, plan_fecha_inicio, plan_fecha_fin, plan_tipoplan, plan_planest, plan_poa) VALUES ((select * from planes.f_codigo_planes(1)), '"+req.body.plan_nombre+"', '"+req.body.plan_fecha_inicio+"', '"+req.body.plan_fecha_fin+"', '"+req.body.plan_tipoplan+"', '"+req.body.plan_planest+"', '"+req.body.plan_poa+"');");
         if (response.rowCount > 0) {
             callback(true, response.rows);
           } else {
@@ -53,7 +53,7 @@ module.exports.IngresarPlan = async function (req, callback){
 //Modificar plan estrategico
 module.exports.ModificarPlan = async function (req, callback){
     try {
-        const response = await pool.pool.query("UPDATE estrategico.plan_estrategico SET plan_nombre='"+req.body.plan_nombre+"', plan_fecha_inicio='"+req.body.plan_fecha_inicio+"', plan_fecha_fin='"+req.body.plan_fecha_fin+"', plan_vision='"+req.body.plan_vision+"', plan_mision='"+req.body.plan_mision+"', plan_anio='"+req.body.plan_anio+"', plan_estado='"+req.body.plan_estado+"' WHERE plan_id='"+req.body.plan_id+"';");
+        const response = await pool.pool.query("UPDATE planes.planes SET plan_nombre='"+req.body.plan_nombre+"', plan_fecha_inicio='"+req.body.plan_fecha_inicio+"', plan_fecha_fin='"+req.body.plan_fecha_fin+"', plan_estado='"+req.body.plan_estado+"', plan_planest='"+req.body.plan_planest+"', plan_poa='"+req.body.plan_poa+"' WHERE plan_id='"+req.body.plan_id+"';");
         if (response.rowCount > 0) {
             callback(true);
           } else {
@@ -65,42 +65,15 @@ module.exports.ModificarPlan = async function (req, callback){
       }
 }
 
- //Validacion de eliminación de planes estratégicos
- module.exports.ValidacionEliminacion = async function (req, callback) {
-    try {
-        const response = await pool.pool.query("select exists(select * from estrategico.plan_estrategico where plan_planid='"+req.body.codigo+"');");
-        if (response.rowCount > 0) {
-          callback(true, response.rows);
-        } else {
-          callback(false);
-        }
-    } catch (error) {
-      console.log("Error: " + error.stack);
-      callback(false);
-    }
-  };
-
   //Eliminar plan estrategico
 module.exports.EliminarPlan = async function (req, callback){
     try {
-        const response = await pool.pool.query("select exists(select * from estrategico.estructura where est_plan='"+req.body.plan_id+"');");
-        if(response.rowCount>0){
-          if(response.rows[0].exists){
-            const response2 = await pool.pool.query("update estrategico.plan_estrategico set plan_estado=0 WHERE plan_id='"+req.body.plan_id+"';");
-            if (response2.rowCount > 0) {
-                callback(true);
-              } else {
-                callback(false);
-              }
-          }else{
-            const response2 = await pool.pool.query("DELETE FROM estrategico.plan_estrategico WHERE plan_id='"+req.body.plan_id+"';");
-            if (response2.rowCount > 0) {
-                callback(true);
-              } else {
-                callback(false);
-              }
-          }
-        }
+      const response = await pool.pool.query("update planes.planes set plan_estado=0 WHERE plan_id='"+req.body.plan_id+"';");
+      if (response.rowCount > 0) {
+          callback(true);
+      } else {
+          callback(false);
+      }   
     }  catch (error) {
         console.log("Error: " + error.stack);
         callback(false);
