@@ -13,7 +13,7 @@ module.exports.ListarEstructuraPlan = async function (req, callback){
           var orden=req.body.orden-1;
           response = await pool.pool.query("SELECT ep.eplan_id, ep.eplan_codigo, ep.eplan_nombre, est.est_codigo, ep.eplan_indicador FROM estrategico.estructura_plan as ep inner join estrategico.estructura as est on ep.eplan_estructura=est_id where ep.eplan_plan='"+req.body.codigo+"'  and ep.eplan_estado=1 and (est.est_orden='"+orden+"' or est.est_orden='"+req.body.orden+"') order by ep.eplan_estructura, ep.eplan_codigo;");
         }else{
-          response = await pool.pool.query("SELECT ep.eplan_id, ep.eplan_codigo, ep.eplan_nombre, est.est_codigo, ep.eplan_indicador FROM estrategico.estructura_plan as ep inner join estrategico.estructura as est on ep.eplan_estructura=est_id where ep.eplan_plan='"+req.body.codigo+"'  and ep.eplan_estado=1 and est.est_orden='"+req.body.orden+"' order by ep.eplan_estructura, ep.eplan_codigo;");
+          response = await pool.pool.query("SELECT ep.eplan_id, ep.eplan_codigo, ep.eplan_nombre, est.est_codigo, ep.eplan_indicador FROM estrategico.estructura_plan as ep inner join estrategico.estructura as est on ep.eplan_estructura=est_id where ep.eplan_plan='"+req.body.codigo+"'  and ep.eplan_estado=1 and est.est_orden=(select max(est_orden) from estrategico.estructura where est_plan='"+req.body.codigo+"' and est_estado=1 and est_planes=true) order by ep.eplan_estructura, ep.eplan_codigo;");
         }
         if(response.rowCount>0){
             callback(true, response.rows);
@@ -126,6 +126,70 @@ async function listarHijos(dato){
   }
 }
 
+async function listarEplanCodigo(codigo){
+  try {
+    const response = await pool.pool.query(`select * from (WITH RECURSIVE estructura_recursiva AS (
+    SELECT 
+        ep.eplan_id,
+        ep.eplan_eplan_id,
+        ep.eplan_estructura,
+        e.est_orden,
+        e.est_orden AS nivel,
+        ep.eplan_nombre,
+		e.est_nombre,
+		ep.eplan_eje
+    FROM 
+        estrategico.estructura_plan ep
+    INNER JOIN 
+        estrategico.estructura e ON ep.eplan_estructura = e.est_id
+    WHERE 
+        ep.eplan_id = ${codigo} and
+		ep.eplan_estado=1 and
+		e.est_estado=1
+    UNION ALL
+    SELECT 
+        parent.eplan_id,
+        parent.eplan_eplan_id,
+        parent.eplan_estructura,
+        e_parent.est_orden,
+        e_parent.est_orden AS nivel, 
+        parent.eplan_nombre,
+		e_parent.est_nombre,	
+		parent.eplan_eje
+    FROM 
+        estrategico.estructura_plan parent
+    INNER JOIN 
+        estructura_recursiva cr ON parent.eplan_id = cr.eplan_eplan_id
+    INNER JOIN 
+        estrategico.estructura e_parent ON parent.eplan_estructura = e_parent.est_id
+	WHERE
+		parent.eplan_estado=1 and
+		e_parent.est_estado=1
+)
+SELECT 
+    eplan_id,
+    eplan_eplan_id,
+    eplan_estructura,
+    est_orden,
+    nivel,
+    eplan_nombre,
+	est_nombre,
+	eplan_eje
+FROM 
+    estructura_recursiva
+ORDER BY 
+    est_orden DESC) as con where est_orden=1;`);
+    if(response.rowCount>0){
+      return(response.rows);
+    }else{
+      return(false);
+    }
+  } catch (error) {
+    console.log("Error: "+error.stack);
+    return(false);
+  }
+}
+
 //Ingresar estructura plan
 module.exports.IngresarEstructuraPlan = async function (req, callback){
     try {
@@ -149,7 +213,8 @@ module.exports.IngresarEstructuraPlan = async function (req, callback){
             if(req.body.eplan_depende==0){
                 response = await pool.pool.query("INSERT INTO estrategico.estructura_plan(eplan_id, eplan_codigo, eplan_nombre, eplan_plan, eplan_estructura, eplan_eje) VALUES ((select * from estrategico.f_codigo_estrategico(3)), (select * from estrategico.f_codigo_estructuraplan('"+req.body.eplan_estructura+"')), '"+req.body.eplan_nombre+"', '"+req.body.eplan_plan+"', '"+req.body.eplan_estructura+"', '"+req.body.eplan_eje+"');");
             }else{
-                response = await pool.pool.query("INSERT INTO estrategico.estructura_plan(eplan_id, eplan_codigo, eplan_nombre, eplan_plan, eplan_estructura, eplan_depende, eplan_eje) VALUES ((select * from estrategico.f_codigo_estrategico(3)), (select * from estrategico.f_codigo_estructuraplan('"+req.body.eplan_estructura+"')), '"+req.body.eplan_nombre+"', '"+req.body.eplan_plan+"', '"+req.body.eplan_estructura+"', '"+req.body.eplan_depende+"', '"+req.body.eplan_eje+"');");
+              const listado=await listarEplanCodigo(req.body.eplan_depende);
+              response = await pool.pool.query("INSERT INTO estrategico.estructura_plan(eplan_id, eplan_codigo, eplan_nombre, eplan_plan, eplan_estructura, eplan_depende, eplan_eje) VALUES ((select * from estrategico.f_codigo_estrategico(3)), (select * from estrategico.f_codigo_estructuraplan('"+req.body.eplan_estructura+"')), '"+req.body.eplan_nombre+"', '"+req.body.eplan_plan+"', '"+req.body.eplan_estructura+"', '"+req.body.eplan_depende+"', '"+listado[0].eplan_eje+"');");
             }
           }else{
               if(req.body.eplan_depende==0){

@@ -5,9 +5,9 @@ module.exports.ListarEjes = async function (req, callback){
     try {
           var response;
           if(req.body.tipo==1){
-            response = await pool.pool.query("SELECT *, case when eje_estado=1 then 'Activo' when eje_estado=0 then 'Inactivo' end as estadonombre FROM estrategico.eje_estrategico where eje_plan='"+req.body.codigo+"' order by eje_id;");
+            response = await pool.pool.query("SELECT *, case when eje_estado=1 then 'Activo' when eje_estado=0 then 'Inactivo' end as estadonombre FROM estrategico.eje_estrategico order by eje_id;");
           }else{
-            response = await pool.pool.query("SELECT * FROM estrategico.eje_estrategico where eje_plan='"+req.body.codigo+"' and eje_estado=1 order by eje_id;");
+            response = await pool.pool.query("SELECT * FROM estrategico.eje_estrategico where eje_estado=1 order by eje_id;");
           }
         if(response.rowCount>0){
             callback(true, response.rows);
@@ -23,7 +23,7 @@ module.exports.ListarEjes = async function (req, callback){
 //Ingresar eje
 module.exports.IngresarEje = async function (req, callback){
     try {
-        const response = await pool.pool.query("INSERT INTO estrategico.eje_estrategico(eje_id, eje_nombre, eje_plan) VALUES ((select * from estrategico.f_codigo_estrategico(4)), '"+req.body.eje_nombre+"', '"+req.body.eje_plan+"');");
+        const response = await pool.pool.query("INSERT INTO estrategico.eje_estrategico(eje_id, eje_nombre) VALUES ((select * from estrategico.f_codigo_estrategico(4)), '"+req.body.eje_nombre+"');");
         if (response.rowCount > 0) {
             callback(true);
           } else {
