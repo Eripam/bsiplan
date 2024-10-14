@@ -12,7 +12,7 @@ const https = require("https");
 
 //configuraciones
 const app = express();
-const port_https = 3000;
+const port_https = 8128;
 // app.use(cors())
 
 
@@ -31,7 +31,7 @@ app.use(function (req, resp, next) {
 
 //Mensaje que se mmuestra en el navegador
 app.get("/", (req, res) => {
-  res.send("Bienvenidos Backend SIPLANI");
+  res.send("Bienvenidos Backend SIPLAN Plan Estratégico");
 });
 //rutas
 app.use(require("./app"));
